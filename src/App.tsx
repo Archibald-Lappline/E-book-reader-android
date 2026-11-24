@@ -61,7 +61,6 @@ function AppContent() {
     refreshBooks(true);
   }, [refreshBooks]);
 
-  // Initialize Android Predictive Back and Back Gesture prevention
   useEffect(() => {
     initAndroidBackNavigation();
     registerExitToastCallback((show) => {
@@ -69,7 +68,6 @@ function AppContent() {
     });
   }, []);
 
-  // Swipe is ONLY permitted on the main root sections of Books and Audiobooks
   const canSwipe = !isFullPlayerOpen && ((mainTab === 'books' && isBooksAtRoot) || (mainTab === 'audiobooks' && isAudiobooksAtRoot));
 
   const switchToTab = useCallback((targetTab: 'books' | 'audiobooks') => {
@@ -87,7 +85,6 @@ function AppContent() {
     } catch {}
   }, []);
 
-  // Synchronize strip position whenever mainTab updates (e.g. from back gestures or programmatic switch)
   useEffect(() => {
     if (stripRef.current && !isDraggingRef.current) {
       stripRef.current.style.transition = 'transform 0.28s cubic-bezier(0.2, 0, 0, 1)';
@@ -96,7 +93,6 @@ function AppContent() {
   }, [mainTab]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
-    // Strictly disable swiping when not at root of current section (e.g. inside a collection or modal)
     if (!canSwipe) {
       touchStartPos.current = null;
       isHorizontalSwipe.current = false;
@@ -116,7 +112,6 @@ function AppContent() {
 
     if (isHorizontalSwipe.current === null) {
       if (Math.abs(dx) > 7 || Math.abs(dy) > 7) {
-        // Only engage swipe if horizontal movement is clearly dominant
         if (Math.abs(dx) > Math.abs(dy) * 1.2) {
           isHorizontalSwipe.current = true;
           isDraggingRef.current = true;
@@ -128,7 +123,6 @@ function AppContent() {
 
     if (isHorizontalSwipe.current) {
       let constrainedDx = dx;
-      // Rubber-band resistance when pulling beyond outer bounds
       if (mainTabRef.current === 'books' && dx > 0) {
         constrainedDx = dx * 0.25;
       } else if (mainTabRef.current === 'audiobooks' && dx < 0) {
@@ -161,7 +155,6 @@ function AppContent() {
     isHorizontalSwipe.current = null;
     isDraggingRef.current = false;
 
-    // Threshold: drag > 45px or swift flick (velocity > 0.25)
     const threshold = 45;
     let targetTab: 'books' | 'audiobooks' = mainTabRef.current;
 
@@ -200,7 +193,6 @@ function AppContent() {
     }
   }, []);
 
-  // Back gesture: if on Audiobooks tab at root, return to Books tab
   useEffect(() => {
     if (!activeBook && mainTab === 'audiobooks' && isAudiobooksAtRoot) {
       const unreg = pushBackHandler(() => {
@@ -233,7 +225,6 @@ function AppContent() {
     setShowSyncModal(false);
   }, []);
 
-  // Back gesture support for Modals at root level
   useEffect(() => {
     if (showSyncModal) {
       const unreg = pushBackHandler(() => {
@@ -294,17 +285,14 @@ function AppContent() {
 
   const currentTheme = READER_THEMES[settings.theme] || READER_THEMES.paper;
 
-  // Synchronize System Tray (Status Bar & Theme Color) with Light/Dark App Themes
   useEffect(() => {
     const isDark = currentTheme.isDark;
 
-    // 1. Update HTML document color-scheme and CSS dark class
     document.documentElement.style.colorScheme = isDark ? 'dark' : 'light';
     document.documentElement.classList.toggle('dark', isDark);
     document.body.classList.toggle('dark', isDark);
     document.body.style.backgroundColor = currentTheme.bg;
 
-    // 2. Update Web / Android Chrome meta theme-color tag
     let metaThemeColor = document.querySelector('meta[name="theme-color"]');
     if (!metaThemeColor) {
       metaThemeColor = document.createElement('meta');
@@ -313,11 +301,8 @@ function AppContent() {
     }
     metaThemeColor.setAttribute('content', currentTheme.bg);
 
-    // 3. Update Android Native Status Bar (Capacitor)
     try {
       if (Capacitor.isPluginAvailable('StatusBar')) {
-        // Style.Light = Dark text/icons for light backgrounds!
-        // Style.Dark = Light text/icons for dark backgrounds!
         StatusBar.setStyle({
           style: isDark ? Style.Dark : Style.Light,
         }).catch(() => {});
@@ -326,7 +311,6 @@ function AppContent() {
         }).catch(() => {});
       }
     } catch {
-      // Ignore if not in native shell
     }
   }, [currentTheme]);
 
@@ -339,7 +323,6 @@ function AppContent() {
         color: currentTheme.text,
       }}
     >
-      {/* Global Brightness Overlay */}
       {settings.brightness < 100 && (
         <div
           className="fixed inset-0 pointer-events-none z-[9999] transition-opacity"
@@ -381,7 +364,6 @@ function AppContent() {
             </motion.div>
           ) : (
             <div className="relative w-full h-full flex flex-col overflow-hidden">
-              {/* Native Mobile ViewPager Viewport */}
               <div
                 id="main-tabs-swipe-viewport"
                 className="flex-1 w-full h-full overflow-hidden relative select-none"
@@ -390,7 +372,6 @@ function AppContent() {
                 onTouchEnd={handleTouchEnd}
                 onTouchCancel={handleTouchCancel}
               >
-                {/* 120fps Hardware-Accelerated Sliding Strip */}
                 <div
                   ref={stripRef}
                   id="main-tabs-sliding-strip"
@@ -400,7 +381,6 @@ function AppContent() {
                     transition: 'transform 0.28s cubic-bezier(0.2, 0, 0, 1)',
                   }}
                 >
-                  {/* Page 0: Books */}
                   <div
                     className="w-1/2 min-w-[50%] h-full overflow-hidden"
                     aria-hidden={mainTab !== 'books'}
@@ -418,7 +398,6 @@ function AppContent() {
                     />
                   </div>
 
-                  {/* Page 1: Audiobooks */}
                   <div
                     className="w-1/2 min-w-[50%] h-full overflow-hidden"
                     aria-hidden={mainTab !== 'audiobooks'}
@@ -436,7 +415,6 @@ function AppContent() {
                 </div>
               </div>
 
-              {/* Material 3 Bottom Navigation Bar */}
               <div
                 id="main-bottom-navigation"
                 className="fixed bottom-0 left-0 right-0 z-30 h-16 border-t backdrop-blur-lg flex items-center justify-around px-6 select-none transition-colors"
@@ -448,7 +426,6 @@ function AppContent() {
                   color: currentTheme.text,
                 }}
               >
-                {/* Books Tab */}
                 <button
                   id="tab-btn-books"
                   onClick={() => switchToTab('books')}
@@ -473,7 +450,6 @@ function AppContent() {
                   </span>
                 </button>
 
-                {/* Audiobooks Tab */}
                 <button
                   id="tab-btn-audiobooks"
                   onClick={() => switchToTab('audiobooks')}
@@ -500,16 +476,13 @@ function AppContent() {
         </div>
       )}
 
-      {/* Floating Mini Player (visible when track loaded, docked above nav bar or in reader) */}
       <MiniAudioPlayer
         theme={currentTheme}
         bottomOffset={activeBook ? 24 : 68}
       />
 
-      {/* Fullscreen Audiobook Player */}
       <AudioPlayerModal theme={currentTheme} />
 
-      {/* Modals */}
       {showSyncModal && (
         <SyncDialog
           onClose={handleCloseSync}
@@ -524,7 +497,6 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      {/* Уведомление о новой версии с GitHub */}
       <AnimatePresence>
         {updateCheck.showBanner && updateCheck.latest && !showSourceCodeModal && !activeBook && (
           <UpdateBanner
@@ -537,7 +509,6 @@ function AppContent() {
         )}
       </AnimatePresence>
 
-      {/* Android Material 3 Double-Back Exit Toast */}
       <AnimatePresence>
         {showExitToast && (
           <motion.div
