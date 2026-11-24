@@ -1,0 +1,24 @@
+{
+  "name": "Читалка Книг (Material E-Reader)",
+  "short_name": "Читалка",
+  "description": "Современное приложение для чтения электронных книг с 3D-перелистыванием и поддержкой EPUB, FB2, PDF, TXT, MD",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a0a",
+  "theme_color": "#f59e0b",
+  "icons": [
+    {
+      "src": "/assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
