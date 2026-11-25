@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { BookOpen, Headphones } from 'lucide-react';
+import { BookOpen, Headphones, Plus, FolderPlus } from 'lucide-react';
 import { Book, ReaderSettings } from './types';
 import { 
   getStoredBooks, 
@@ -26,14 +26,23 @@ import {
   registerExitToastCallback, 
   pushBackHandler 
 } from './utils/androidBackNavigation';
+import { tr, getLanguage, setLanguage } from './i18n';
+
+const NAV_INSET = 'max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px))';
 
 function AppContent() {
   const [books, setBooks] = useState<Book[]>([]);
   const [activeBook, setActiveBook] = useState<Book | null>(null);
   const [mainTab, setMainTab] = useState<'books' | 'audiobooks'>('books');
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
+  const [isAudioCollectionOpen, setIsAudioCollectionOpen] = useState(false);
   const [isBooksAtRoot, setIsBooksAtRoot] = useState<boolean>(true);
   const [isAudiobooksAtRoot, setIsAudiobooksAtRoot] = useState<boolean>(true);
   const [settings, setSettings] = useState<ReaderSettings>(getStoredSettings());
+  // Язык применяется до отрисовки дочерних компонентов, чтобы весь интерфейс
+  // перерисовался уже на новом языке.
+  const appLanguage = settings.appLanguage || getLanguage();
+  if (appLanguage !== getLanguage()) setLanguage(appLanguage);
   const [showSyncModal, setShowSyncModal] = useState<boolean>(false);
   const [showSourceCodeModal, setShowSourceCodeModal] = useState<boolean>(false);
   const updateCheck = useUpdateCheck();
@@ -45,6 +54,20 @@ function AppContent() {
   const touchStartPos = useRef<{ x: number; y: number; time: number } | null>(null);
   const isHorizontalSwipe = useRef<boolean | null>(null);
   const currentDragPx = useRef<number>(0);
+  useEffect(() => {
+    setIsFabMenuOpen(false);
+  }, [mainTab, activeBook, isAudioCollectionOpen]);
+
+  const showCenterPlus = !(mainTab === 'audiobooks' && isAudioCollectionOpen);
+
+  const handleCenterPlus = () => {
+    if (mainTab === 'books') {
+      window.dispatchEvent(new CustomEvent('library:add-book'));
+    } else {
+      setIsFabMenuOpen((v) => !v);
+    }
+  };
+
   const mainTabRef = useRef<'books' | 'audiobooks'>(mainTab);
   mainTabRef.current = mainTab;
 
@@ -341,7 +364,7 @@ function AppContent() {
             className="w-10 h-10 border-3 border-t-transparent rounded-full animate-spin mb-4"
             style={{ borderColor: currentTheme.accent, borderTopColor: 'transparent' }}
           />
-          <p className="text-xs font-semibold opacity-70">Загрузка библиотеки...</p>
+          <p className="text-xs font-semibold opacity-70">{tr("Загрузка библиотеки...")}</p>
         </div>
       ) : (
         <div className="relative w-full h-full flex flex-col overflow-hidden">
@@ -410,15 +433,70 @@ function AppContent() {
                       onOpenSync={handleOpenSync}
                       bottomPadding={currentTrack ? 128 : 64}
                       onIsAtRootChange={setIsAudiobooksAtRoot}
+                      onCollectionOpenChange={setIsAudioCollectionOpen}
                     />
                   </div>
                 </div>
               </div>
 
+              {mainTab === 'audiobooks' && isFabMenuOpen && (
+                <div
+                  className="fixed inset-0 z-20"
+                  onClick={() => setIsFabMenuOpen(false)}
+                />
+              )}
+
+              <div
+                className="fixed left-0 right-0 z-30 flex flex-col items-center gap-2.5 pointer-events-none select-none"
+                style={{ bottom: `calc(${currentTrack ? 136 : 76}px + ${NAV_INSET})` }}
+              >
+                <AnimatePresence>
+                  {mainTab === 'audiobooks' && isFabMenuOpen && (
+                    <>
+                      <motion.button
+                        key="menu-create-collection"
+                        initial={{ opacity: 0, y: 16, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 16, scale: 0.9 }}
+                        transition={{ duration: 0.15 }}
+                        id="btn-fab-create-collection"
+                        onClick={() => {
+                          setIsFabMenuOpen(false);
+                          window.dispatchEvent(new CustomEvent('audiobooks:create-collection'));
+                        }}
+                        className="pointer-events-auto h-11 px-4 rounded-2xl bg-neutral-900 text-amber-400 dark:bg-neutral-800 border border-amber-500/35 font-bold text-xs shadow-lg shadow-black/25 flex items-center gap-2 cursor-pointer active:scale-95"
+                      >
+                        <FolderPlus className="w-4 h-4 text-amber-500" />
+                        <span className="tracking-tight">{tr("Создать сборник")}</span>
+                      </motion.button>
+
+                      <motion.button
+                        key="menu-add-audiobook"
+                        initial={{ opacity: 0, y: 16, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 16, scale: 0.9 }}
+                        transition={{ duration: 0.15, delay: 0.04 }}
+                        id="btn-fab-add-audiobook"
+                        onClick={() => {
+                          setIsFabMenuOpen(false);
+                          window.dispatchEvent(new CustomEvent('audiobooks:add-audiobook'));
+                        }}
+                        className="pointer-events-auto h-12 px-5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold shadow-xl shadow-amber-500/30 flex items-center gap-2.5 cursor-pointer active:scale-95"
+                      >
+                        <Headphones className="w-5 h-5" />
+                        <span className="text-sm font-bold tracking-tight">{tr("Добавить аудиокнигу")}</span>
+                      </motion.button>
+                    </>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <div
                 id="main-bottom-navigation"
-                className="fixed bottom-0 left-0 right-0 z-30 h-16 border-t backdrop-blur-lg flex items-center justify-around px-6 select-none transition-colors"
+                className="fixed bottom-0 left-0 right-0 z-30 border-t backdrop-blur-lg flex items-center justify-around px-6 select-none transition-colors"
                 style={{
+                  height: `calc(64px + ${NAV_INSET})`,
+                  paddingBottom: NAV_INSET,
                   backgroundColor: currentTheme.isDark
                     ? 'rgba(18, 18, 18, 0.95)'
                     : 'rgba(255, 255, 255, 0.96)',
@@ -443,12 +521,27 @@ function AppContent() {
                     <BookOpen className="w-5 h-5" />
                   </div>
                   <span className="text-[11px] mt-0.5 tracking-tight flex items-center gap-1">
-                    Книги
+                    {tr("Книги")}
                     {books.length > 0 && (
                       <span className="text-[10px] opacity-75">({books.length})</span>
                     )}
                   </span>
                 </button>
+
+                {showCenterPlus && (
+                  <button
+                    id="nav-center-plus"
+                    onClick={handleCenterPlus}
+                    aria-expanded={mainTab === 'audiobooks' ? isFabMenuOpen : undefined}
+                    className="shrink-0 mx-2 w-12 h-12 rounded-2xl bg-amber-500 hover:bg-amber-400 text-neutral-950 shadow-lg shadow-amber-500/30 flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+                    title={mainTab === 'books' ? tr("Добавить книгу") : tr("Добавить")}
+                  >
+                    <Plus
+                      className="w-7 h-7 transition-transform duration-200"
+                      style={{ transform: isFabMenuOpen && mainTab === 'audiobooks' ? 'rotate(45deg)' : 'rotate(0deg)' }}
+                    />
+                  </button>
+                )}
 
                 <button
                   id="tab-btn-audiobooks"
@@ -467,7 +560,7 @@ function AppContent() {
                     <Headphones className="w-5 h-5" />
                   </div>
                   <span className="text-[11px] mt-0.5 tracking-tight">
-                    Аудиокниги
+                    {tr("Аудиокниги")}
                   </span>
                 </button>
               </div>
@@ -478,7 +571,7 @@ function AppContent() {
 
       <MiniAudioPlayer
         theme={currentTheme}
-        bottomOffset={activeBook ? 24 : 68}
+        bottomOffset={activeBook ? 24 : `calc(68px + ${NAV_INSET})`}
       />
 
       <AudioPlayerModal theme={currentTheme} />
@@ -516,11 +609,12 @@ function AppContent() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.92 }}
             transition={{ duration: 0.16 }}
-            className="fixed bottom-20 left-1/2 -translate-x-1/2 z-[99999] pointer-events-none"
+            className="fixed left-1/2 -translate-x-1/2 z-[99999] pointer-events-none"
+            style={{ bottom: `calc(80px + ${NAV_INSET})` }}
           >
             <div className="px-4 py-2.5 rounded-full bg-neutral-900/95 text-neutral-100 text-xs font-semibold shadow-2xl border border-neutral-700/80 backdrop-blur-md flex items-center gap-2.5">
               <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
-              <span>Нажмите «Назад» ещё раз для выхода</span>
+              <span>{tr("Нажмите «Назад» ещё раз для выхода")}</span>
             </div>
           </motion.div>
         )}

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { X, FolderPlus, FolderCheck, Check, Headphones, Plus } from 'lucide-react';
 import { AudiobookCollection, ReaderThemeConfig } from '../../types';
+import { tr } from '../../i18n';
 
 interface BatchCollectionPickerModalProps {
   collections: AudiobookCollection[];
@@ -56,8 +57,8 @@ export const BatchCollectionPickerModal: React.FC<BatchCollectionPickerModalProp
               <FolderPlus className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-sm font-bold">Добавить в сборник</h3>
-              <p className="text-[11px] opacity-65">Выбрано записей: {selectedCount}</p>
+              <h3 className="text-sm font-bold">{tr("Добавить в сборник")}</h3>
+              <p className="text-[11px] opacity-65">{tr("Выбрано записей:")} {selectedCount}</p>
             </div>
           </div>
           <button
@@ -73,25 +74,25 @@ export const BatchCollectionPickerModal: React.FC<BatchCollectionPickerModalProp
           {isCreating ? (
             <form onSubmit={handleCreateSubmit} className="space-y-3 p-1">
               <div>
-                <label className="text-xs font-bold block mb-1">Название нового сборника</label>
+                <label className="text-xs font-bold block mb-1">{tr("Название нового сборника")}</label>
                 <input
                   type="text"
                   required
                   autoFocus
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  placeholder="Например: Властелин колец"
+                  placeholder={tr("Например: Властелин колец")}
                   className="w-full px-3.5 py-2 rounded-xl border border-inherit/30 bg-black/5 dark:bg-white/5 text-xs font-semibold focus:outline-none focus:border-amber-500"
                 />
               </div>
 
               <div>
-                <label className="text-xs font-bold block mb-1">Автор (необязательно)</label>
+                <label className="text-xs font-bold block mb-1">{tr("Автор (необязательно)")}</label>
                 <input
                   type="text"
                   value={newAuthor}
                   onChange={(e) => setNewAuthor(e.target.value)}
-                  placeholder="Например: Дж. Р. Р. Толкин"
+                  placeholder={tr("Например: Дж. Р. Р. Толкин")}
                   className="w-full px-3.5 py-2 rounded-xl border border-inherit/30 bg-black/5 dark:bg-white/5 text-xs focus:outline-none focus:border-amber-500"
                 />
               </div>
@@ -102,14 +103,14 @@ export const BatchCollectionPickerModal: React.FC<BatchCollectionPickerModalProp
                   onClick={() => setIsCreating(false)}
                   className="flex-1 py-2 rounded-xl border border-inherit/30 text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/5"
                 >
-                  Назад
+                  {tr("Назад")}
                 </button>
                 <button
                   type="submit"
                   disabled={!newTitle.trim()}
                   className="flex-1 py-2 rounded-xl bg-amber-500 text-neutral-950 text-xs font-bold hover:bg-amber-400 active:scale-95 disabled:opacity-50"
                 >
-                  Создать и переместить
+                  {tr("Создать и переместить")}
                 </button>
               </div>
             </form>
@@ -122,17 +123,17 @@ export const BatchCollectionPickerModal: React.FC<BatchCollectionPickerModalProp
                 className="w-full p-3 rounded-2xl border-2 border-dashed border-amber-500/40 hover:border-amber-500 bg-amber-500/5 hover:bg-amber-500/10 active:scale-98 transition-all flex items-center justify-center gap-2 text-xs font-bold text-amber-500 cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
-                <span>Создать новый сборник для выбранного</span>
+                <span>{tr("Создать новый сборник для выбранного")}</span>
               </button>
 
               {/* Existing Collections List */}
               <div className="space-y-1.5 pt-1">
                 <span className="text-[10px] font-bold uppercase tracking-wider opacity-60 px-1 block">
-                  Или выберите существующий ({collections.length}):
+                  {tr`Или выберите существующий (${collections.length}):`}
                 </span>
 
                 {collections.length === 0 ? (
-                  <p className="text-xs opacity-60 text-center py-4">Сборников пока нет</p>
+                  <p className="text-xs opacity-60 text-center py-4">{tr("Сборников пока нет")}</p>
                 ) : (
                   collections.map((col) => (
                     <button

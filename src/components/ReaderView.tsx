@@ -41,6 +41,7 @@ import {
   getComicPages,
   getBookById
 } from '../services/storage';
+import { tr } from '../i18n';
 
 interface ReaderViewProps {
   book: Book;
@@ -146,7 +147,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
   });
 
   const currentTheme = READER_THEMES[settings.theme] || READER_THEMES.paper;
-  const currentChapter = chapters[currentChapterIdx] || chapters[0] || { id: 'empty', title: 'Начало книги', content: '<p>Текст книги...</p>' };
+  const currentChapter = chapters[currentChapterIdx] || chapters[0] || { id: 'empty', title: tr("Начало книги"), content: tr("<p>Текст книги...</p>") };
 
   // CBZ comic / manga dedicated page extraction
   const isCbzBook = book.format === 'cbz';
@@ -1334,7 +1335,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
       id: `note-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`,
       bookId: book.id,
       chapterIndex: currentChapterIdx,
-      chapterTitle: currentChapter.title || `Глава ${currentChapterIdx + 1}`,
+      chapterTitle: currentChapter.title || tr`Глава ${currentChapterIdx + 1}`,
       selectedText: cleanText,
       noteText: noteComment.trim(),
       color,
@@ -1437,10 +1438,10 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       id="btn-reader-back"
                       onClick={onBackToLibrary}
                       className="p-2 -ml-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 transition-colors flex items-center gap-1.5 cursor-pointer active:scale-95"
-                      title="Вернуться в библиотеку"
+                      title={tr("Вернуться в библиотеку")}
                   >
                     <ArrowLeft className="w-5 h-5" />
-                    <span className="text-xs font-semibold hidden min-[400px]:inline">Библиотека</span>
+                    <span className="text-xs font-semibold hidden min-[400px]:inline">{tr("Библиотека")}</span>
                   </button>
 
                   <div className="min-w-0 truncate ml-1">
@@ -1458,7 +1459,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       id="btn-reader-search"
                       onClick={openSearch}
                       className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                      title="Поиск по книге"
+                      title={tr("Поиск по книге")}
                   >
                     <Search className="w-5 h-5 opacity-75 hover:opacity-100" />
                   </button>
@@ -1467,7 +1468,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       id="btn-reader-bookmark"
                       onClick={handleToggleBookmark}
                       className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                      title={isBookmarked ? 'Удалить закладку' : 'Добавить закладку'}
+                      title={isBookmarked ? tr("Удалить закладку") : tr("Добавить закладку")}
                   >
                     <BookmarkIcon
                         className={`w-5 h-5 ${isBookmarked ? 'fill-amber-500 text-amber-500' : 'opacity-75'}`}
@@ -1492,15 +1493,15 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
           </span>
               <span className="text-[11px] opacity-75 border-r border-neutral-700 pr-2 whitespace-nowrap">
             {allSearchMatches.length > 0
-                ? `${activeMatchGlobalIdx + 1} из ${allSearchMatches.length}`
-                : '0 совпадений'}
+                ? tr`${activeMatchGlobalIdx + 1} из ${allSearchMatches.length}`
+                : tr("0 совпадений")}
           </span>
               <button
                   id="btn-search-prev-match"
                   onClick={handlePrevSearchMatch}
                   disabled={allSearchMatches.length <= 1}
                   className="p-1 rounded-lg hover:bg-white/15 disabled:opacity-30 cursor-pointer active:scale-90 transition-all text-neutral-200"
-                  title="Предыдущее совпадение"
+                  title={tr("Предыдущее совпадение")}
               >
                 <ChevronUp className="w-4 h-4" />
               </button>
@@ -1509,7 +1510,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                   onClick={handleNextSearchMatch}
                   disabled={allSearchMatches.length <= 1}
                   className="p-1 rounded-lg hover:bg-white/15 disabled:opacity-30 cursor-pointer active:scale-90 transition-all text-neutral-200"
-                  title="Следующее совпадение"
+                  title={tr("Следующее совпадение")}
               >
                 <ChevronDown className="w-4 h-4" />
               </button>
@@ -1520,7 +1521,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                     setActiveMatchGlobalIdx(0);
                   }}
                   className="p-1 -mr-1 rounded-lg hover:bg-white/15 text-neutral-400 hover:text-white cursor-pointer transition-colors"
-                  title="Сбросить поиск"
+                  title={tr("Сбросить поиск")}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1699,7 +1700,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                         handlePrevPage();
                       }}
                       className="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white items-center justify-center backdrop-blur-xs opacity-0 group-hover:opacity-75 hover:!opacity-100 transition-all cursor-pointer shadow-md"
-                      title="Предыдущая страница"
+                      title={tr("Предыдущая страница")}
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
@@ -1713,7 +1714,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                         handleNextPage();
                       }}
                       className="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/20 hover:bg-black/40 text-white items-center justify-center backdrop-blur-xs opacity-0 group-hover:opacity-75 hover:!opacity-100 transition-all cursor-pointer shadow-md"
-                      title="Следующая страница"
+                      title={tr("Следующая страница")}
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -1731,7 +1732,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                 <div className="px-3.5 py-1 rounded-full bg-black/15 dark:bg-white/10 backdrop-blur-xs flex items-center gap-3 shadow-2xs">
                   <span className="truncate max-w-[140px] sm:max-w-xs">{currentChapter.title}</span>
                   <span className="shrink-0 font-medium">
-              Стр. {currentPageInChapter + 1} из {totalPagesInChapter} · {overallProgress}%
+              {tr("Стр.")} {tr`${currentPageInChapter + 1} из ${totalPagesInChapter}`} · {overallProgress}%
             </span>
                 </div>
               </div>
@@ -1779,9 +1780,9 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                 {currentChapter.title}
               </span>
                   <div className="flex items-center gap-2 shrink-0 font-mono text-[11px] opacity-75">
-                    <span>Стр. {currentPageInChapter + 1} / {totalPagesInChapter}</span>
+                    <span>{tr("Стр.")} {currentPageInChapter + 1} / {totalPagesInChapter}</span>
                     <span>•</span>
-                    <span>{overallProgress}% книги</span>
+                    <span>{tr`${overallProgress}% книги`}</span>
                   </div>
                 </div>
 
@@ -1792,7 +1793,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       disabled={currentChapterIdx <= 0 && currentPageInChapter <= 0}
                       onClick={handlePrevPage}
                       className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-black/10 dark:hover:bg-white/10 disabled:opacity-30 shrink-0 transition-colors cursor-pointer"
-                      title="Назад"
+                      title={tr("Назад")}
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
@@ -1818,52 +1819,42 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       disabled={currentChapterIdx >= chapters.length - 1 && currentPageInChapter >= totalPagesInChapter - 1}
                       onClick={handleNextPage}
                       className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-black/10 dark:hover:bg-white/10 disabled:opacity-30 shrink-0 transition-colors cursor-pointer"
-                      title="Вперёд"
+                      title={tr("Вперёд")}
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
                 </div>
 
-                {/* Bottom tool buttons: Exactly 4 columns (no redundant prev/next buttons) */}
-                <div className="grid grid-cols-4 gap-2 pt-2 border-t border-inherit/15">
+                {/* Bottom tool buttons: 3 columns (поиск — только в верхней панели) */}
+                <div className="grid grid-cols-3 gap-2 pt-2 border-t border-inherit/15">
                   <button
                       id="btn-bottom-toc"
                       onClick={openToc}
                       className="py-1.5 px-1 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer opacity-85 hover:opacity-100"
-                      title="Оглавление"
+                      title={tr("Оглавление")}
                   >
                     <List className="w-4.5 h-4.5" />
-                    <span className="text-[10px] font-medium leading-none">Главы</span>
-                  </button>
-
-                  <button
-                      id="btn-bottom-search"
-                      onClick={openSearch}
-                      className="py-1.5 px-1 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer opacity-85 hover:opacity-100"
-                      title="Поиск по тексту"
-                  >
-                    <Search className="w-4.5 h-4.5" />
-                    <span className="text-[10px] font-medium leading-none">Поиск</span>
+                    <span className="text-[10px] font-medium leading-none">{tr("Главы")}</span>
                   </button>
 
                   <button
                       id="btn-bottom-settings"
                       onClick={openSettings}
                       className="py-1.5 px-1 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer opacity-85 hover:opacity-100"
-                      title="Шрифт и верстка текста"
+                      title={tr("Шрифт и верстка текста")}
                   >
                     <Type className="w-4.5 h-4.5" />
-                    <span className="text-[10px] font-medium leading-none">Шрифт</span>
+                    <span className="text-[10px] font-medium leading-none">{tr("Шрифт")}</span>
                   </button>
 
                   <button
                       id="btn-bottom-notes"
                       onClick={openNotes}
                       className="py-1.5 px-1 rounded-xl flex flex-col items-center justify-center gap-1 hover:bg-black/5 dark:hover:bg-white/5 active:scale-95 transition-all cursor-pointer opacity-85 hover:opacity-100 relative"
-                      title="Заметки и цитаты"
+                      title={tr("Заметки и цитаты")}
                   >
                     <Edit3 className="w-4.5 h-4.5" />
-                    <span className="text-[10px] font-medium leading-none">Заметки</span>
+                    <span className="text-[10px] font-medium leading-none">{tr("Заметки")}</span>
                     {notes.length > 0 && (
                         <span className="absolute top-1 right-3 sm:right-6 w-3.5 h-3.5 rounded-full bg-amber-500 text-white text-[7px] font-bold flex items-center justify-center">
                     {notes.length}
@@ -1881,12 +1872,12 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               <CelebrationModal
                   theme={currentTheme}
                   gifSrc={BOOK_FINISHED_GIF_SRC}
-                  title="Книга прочитана!"
-                  badges={['Прогресс: 100%', 'Завершено']}
-                  message={`Поздравляем! Вы дочитали книгу «${book.title}» до конца.`}
-                  secondaryLabel="Остаться"
+                  title={tr("Книга прочитана!")}
+                  badges={[tr("Прогресс: 100%"), tr("Завершено")]}
+                  message={tr`Поздравляем! Вы дочитали книгу «${book.title}» до конца.`}
+                  secondaryLabel={tr("Остаться")}
                   onSecondary={() => setShowBookCompleted(false)}
-                  primaryLabel="В библиотеку"
+                  primaryLabel={tr("В библиотеку")}
                   onPrimary={() => {
                     updateReadingProgress(book.id, currentChapterIdx, 100, 100);
                     onUpdateBookProgress(book.id, currentChapterIdx, 100, 100);
@@ -1902,10 +1893,10 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
               <CelebrationModal
                   theme={currentTheme}
                   gifSrc={PAGE_MILESTONE_GIF_SRC}
-                  title={`Страница ${milestonePage}!`}
-                  badges={[`${milestonePage} стр. позади`]}
-                  message="Вы листаете дальше — так держать!"
-                  secondaryLabel="Читать дальше"
+                  title={tr`Страница ${milestonePage}!`}
+                  badges={[tr`${milestonePage} стр. позади`]}
+                  message={tr("Вы листаете дальше — так держать!")}
+                  secondaryLabel={tr("Читать дальше")}
                   onSecondary={() => setMilestonePage(null)}
               />
           )}
@@ -2079,7 +2070,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                   {activeNotePopup.noteText ? (
                       <div className="p-3 bg-neutral-800/40 rounded-xl text-xs space-y-1">
                         <div className="text-[10px] font-semibold text-amber-400 uppercase tracking-wider">
-                          Ваша заметка
+                          {tr("Ваша заметка")}
                         </div>
                         <div className="text-neutral-200 leading-relaxed">
                           {activeNotePopup.noteText}
@@ -2087,7 +2078,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                       </div>
                   ) : (
                       <div className="text-xs opacity-50 italic">
-                        Выделенная цитата без дополнительного комментария.
+                        {tr("Выделенная цитата без дополнительного комментария.")}
                       </div>
                   )}
 
@@ -2101,7 +2092,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                         }}
                         className="px-3 py-1.5 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 text-xs font-semibold cursor-pointer transition-colors"
                     >
-                      Удалить заметку
+                      {tr("Удалить заметку")}
                     </button>
 
                     <button
@@ -2109,7 +2100,7 @@ export const ReaderView: React.FC<ReaderViewProps> = ({
                         onClick={() => setActiveNotePopup(null)}
                         className="px-4 py-1.5 rounded-xl bg-amber-500 text-neutral-950 text-xs font-bold hover:bg-amber-400 cursor-pointer transition-colors"
                     >
-                      Закрыть
+                      {tr("Закрыть")}
                     </button>
                   </div>
                 </motion.div>

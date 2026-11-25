@@ -16,6 +16,7 @@ import { exportFile } from '../utils/fileExport';
 import { Book } from '../types';
 import { resetAllBooksProgress, deleteAllBooks } from '../services/storage';
 import { ReaderThemeConfig } from '../types';
+import { tr } from '../i18n';
 
 interface LibraryActionsModalProps {
   books: Book[];
@@ -42,17 +43,17 @@ export const LibraryActionsModal: React.FC<LibraryActionsModalProps> = ({
   const handleResetAllProgress = async () => {
     try {
       await resetAllBooksProgress();
-      showToast('Прогресс всех книг сброшен на 0%');
+      showToast(tr("Прогресс всех книг сброшен на 0%"));
       onRefreshLibrary();
     } catch (err) {
       console.error(err);
-      showToast('Ошибка при сбросе прогресса');
+      showToast(tr("Ошибка при сбросе прогресса"));
     }
   };
 
   const handleExportAllBooks = async () => {
     if (books.length === 0) {
-      showToast('В библиотеке нет книг для экспорта');
+      showToast(tr("В библиотеке нет книг для экспорта"));
       return;
     }
 
@@ -61,11 +62,11 @@ export const LibraryActionsModal: React.FC<LibraryActionsModalProps> = ({
       const zip = new JSZip();
 
       for (const book of books) {
-        const safeTitle = (book.title || 'Книга')
+        const safeTitle = (book.title || tr("Книга"))
           .replace(/[\\/:*?"<>|]/g, '_')
           .trim();
         const ext = book.format === 'pdf' ? 'txt' : book.format;
-        const filename = `${safeTitle} - ${book.author || 'Автор'}.${ext}`;
+        const filename = tr`${safeTitle} - ${book.author || 'Автор'}.${ext}`;
 
         // Build file content from chapters without progress metadata
         let content = '';
@@ -96,13 +97,13 @@ export const LibraryActionsModal: React.FC<LibraryActionsModalProps> = ({
         filename,
         content: blob,
         mimeType: 'application/zip',
-        title: `Экспорт ${books.length} книг`,
+        title: tr`Экспорт ${books.length} книг`,
       });
 
       showToast(result.message);
     } catch (err) {
       console.error('Export error', err);
-      showToast('Ошибка при экспорте файлов');
+      showToast(tr("Ошибка при экспорте файлов"));
     } finally {
       setIsExporting(false);
     }
@@ -111,12 +112,12 @@ export const LibraryActionsModal: React.FC<LibraryActionsModalProps> = ({
   const handleDeleteAll = async () => {
     try {
       await deleteAllBooks();
-      showToast('Все книги успешно удалены');
+      showToast(tr("Все книги успешно удалены"));
       onRefreshLibrary();
       setTimeout(onClose, 600);
     } catch (err) {
       console.error(err);
-      showToast('Ошибка при удалении');
+      showToast(tr("Ошибка при удалении"));
     }
   };
 
@@ -152,9 +153,9 @@ export const LibraryActionsModal: React.FC<LibraryActionsModalProps> = ({
               <BookOpen className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm font-bold">Управление библиотекой</h2>
+              <h2 className="text-sm font-bold">{tr("Управление библиотекой")}</h2>
               <p className="text-[11px] opacity-65">
-                {books.length} {books.length === 1 ? 'книга' : books.length < 5 ? 'книги' : 'книг'}
+                {books.length} {books.length === 1 ? tr("книга") : books.length < 5 ? tr("книги") : tr("книг")}
               </p>
             </div>
           </div>
@@ -184,8 +185,8 @@ export const LibraryActionsModal: React.FC<LibraryActionsModalProps> = ({
               <RotateCcw className="w-4.5 h-4.5" />
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold">Очистить прогресс всех книг</h4>
-              <p className="text-[10px] opacity-65">Сбросить страницы и % чтения на 0%</p>
+              <h4 className="text-xs font-bold">{tr("Очистить прогресс всех книг")}</h4>
+              <p className="text-[10px] opacity-65">{tr("Сбросить страницы и % чтения на 0%")}</p>
             </div>
           </button>
 
@@ -204,8 +205,8 @@ export const LibraryActionsModal: React.FC<LibraryActionsModalProps> = ({
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <h4 className="text-xs font-bold">Экспорт всех книг (файлы)</h4>
-              <p className="text-[10px] opacity-65">Скачать исходные файлы книг в ZIP архиве</p>
+              <h4 className="text-xs font-bold">{tr("Экспорт всех книг (файлы)")}</h4>
+              <p className="text-[10px] opacity-65">{tr("Скачать исходные файлы книг в ZIP архиве")}</p>
             </div>
           </button>
 
@@ -221,18 +222,18 @@ export const LibraryActionsModal: React.FC<LibraryActionsModalProps> = ({
                 <Trash2 className="w-4.5 h-4.5" />
               </div>
               <div className="flex-1 min-w-0">
-                <h4 className="text-xs font-bold">Удалить все книги</h4>
-                <p className="text-[10px] opacity-65">Полностью очистить локальную библиотеку</p>
+                <h4 className="text-xs font-bold">{tr("Удалить все книги")}</h4>
+                <p className="text-[10px] opacity-65">{tr("Полностью очистить локальную библиотеку")}</p>
               </div>
             </button>
           ) : (
             <div className="p-3.5 rounded-2xl bg-rose-500/15 border border-rose-500/40 space-y-2.5">
               <div className="flex items-center gap-2 text-rose-500 text-xs font-bold">
                 <AlertTriangle className="w-4 h-4 shrink-0" />
-                <span>Удалить все {books.length} книг?</span>
+                <span>{tr`Удалить все ${books.length} книг?`}</span>
               </div>
               <p className="text-[11px] opacity-75 leading-tight">
-                Это действие необратимо. Книги и заметки будут стёрты.
+                {tr("Это действие необратимо. Книги и заметки будут стёрты.")}
               </p>
               <div className="flex items-center gap-2 pt-1">
                 <button
@@ -240,13 +241,13 @@ export const LibraryActionsModal: React.FC<LibraryActionsModalProps> = ({
                   onClick={handleDeleteAll}
                   className="flex-1 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition-colors cursor-pointer"
                 >
-                  Да, удалить все
+                  {tr("Да, удалить все")}
                 </button>
                 <button
                   onClick={() => setConfirmDelete(false)}
                   className="px-3 py-2 rounded-xl border border-inherit/30 hover:bg-black/10 dark:hover:bg-white/10 text-xs font-semibold cursor-pointer"
                 >
-                  Отмена
+                  {tr("Отмена")}
                 </button>
               </div>
             </div>

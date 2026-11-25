@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { AudiobookTrack, ReaderThemeConfig } from '../../types';
 import { formatAudioTime } from '../../services/audioStorage';
+import { tr } from '../../i18n';
 
 interface ReorderableTrackItemProps {
   track: AudiobookTrack;
@@ -75,7 +76,7 @@ export const ReorderableTrackItem: React.FC<ReorderableTrackItemProps> = ({
           dragControls.start(e);
         }}
         className="p-1 sm:p-1.5 rounded-xl cursor-grab active:cursor-grabbing touch-none text-neutral-400 hover:text-amber-500 active:text-amber-400 shrink-0 transition-colors"
-        title="Зажмите и перетащите для изменения порядка"
+        title={tr("Зажмите и перетащите для изменения порядка")}
       >
         <GripVertical className="w-4 h-4 sm:w-5 sm:h-5" />
       </div>
@@ -93,7 +94,7 @@ export const ReorderableTrackItem: React.FC<ReorderableTrackItemProps> = ({
             ? 'border-2 border-inherit/40 hover:border-amber-500 bg-black/5 dark:bg-white/5'
             : 'opacity-0 sm:group-hover:opacity-60 hover:!opacity-100 border border-inherit/25 hover:border-amber-500'
         }`}
-        title={isSelected ? 'Снять выбор' : 'Выбрать'}
+        title={isSelected ? tr("Снять выбор") : tr("Выбрать")}
       >
         {isSelected ? (
           <Check className="w-4 h-4 stroke-[3]" />
@@ -114,7 +115,7 @@ export const ReorderableTrackItem: React.FC<ReorderableTrackItemProps> = ({
               ? 'bg-amber-500 text-neutral-950'
               : 'bg-black/5 dark:bg-white/10 hover:bg-amber-500 hover:text-neutral-950'
           }`}
-          title={isCur && isPlaying ? 'Пауза' : 'Слушать'}
+          title={isCur && isPlaying ? tr("Пауза") : tr("Слушать")}
         >
           {isCur && isPlaying ? (
             <Pause className="w-4 h-4 fill-current" />
@@ -144,7 +145,7 @@ export const ReorderableTrackItem: React.FC<ReorderableTrackItemProps> = ({
             <span>{formatAudioTime(track.duration)}</span>
             <span>•</span>
             <span className="font-semibold text-amber-500">
-              {track.progressPercent}% прослушано
+              {tr`${track.progressPercent}% прослушано`}
             </span>
             <span className="text-[10px] opacity-60">({track.fileSize})</span>
           </div>
@@ -166,7 +167,7 @@ export const ReorderableTrackItem: React.FC<ReorderableTrackItemProps> = ({
           onEdit();
         }}
         className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 opacity-60 hover:opacity-100 transition-colors cursor-pointer shrink-0"
-        title="Редактировать аудиофайл"
+        title={tr("Редактировать аудиофайл")}
       >
         <Edit2 className="w-4 h-4" />
       </button>

@@ -52,7 +52,7 @@ public class MainActivity extends BridgeActivity {
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     private String currentTitle = "Аудиокнига";
-    private String currentArtist = "Читалка";
+    private String currentArtist = "BookSlut";
     private String currentAlbum = "";
     private Bitmap currentCoverBitmap = null;
     private boolean isCurrentlyPlaying = false;
@@ -538,7 +538,7 @@ public class MainActivity extends BridgeActivity {
                 }
 
                 currentTitle = title;
-                currentArtist = artist != null && !artist.isEmpty() ? artist : "Читалка";
+                currentArtist = artist != null && !artist.isEmpty() ? artist : "BookSlut";
                 currentAlbum = album != null ? album : "";
 
                 // Fetch or decode cover bitmap in background

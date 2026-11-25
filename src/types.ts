@@ -106,6 +106,8 @@ export interface ReaderSettings {
   tapToTurnPages?: boolean;
   /** Поздравительное окно на каждой 67-й странице. undefined/true — включено, false — выключено. */
   showPageMilestone?: boolean;
+  /** Язык интерфейса приложения. */
+  appLanguage?: 'ru' | 'en';
 }
 
 export interface SyncStatus {

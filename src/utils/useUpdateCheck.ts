@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Capacitor } from '@capacitor/core';
 import { App as CapApp } from '@capacitor/app';
 import { SOURCE_CODE_REPO_URL } from '../components/SourceCodeModal';
+import { tr } from '../i18n';
 
 export type UpdateStatus = 'idle' | 'checking' | 'up-to-date' | 'available' | 'error' | 'unsupported';
 
@@ -110,7 +111,7 @@ export function useUpdateCheck(): UpdateCheck {
     const repo = parseRepo(SOURCE_CODE_REPO_URL);
     if (!repo) {
       setStatus('error');
-      setErrorMessage('Не указан адрес репозитория GitHub');
+      setErrorMessage(tr('Не указан адрес репозитория GitHub'));
       return;
     }
 
@@ -131,11 +132,11 @@ export function useUpdateCheck(): UpdateCheck {
         `https://api.github.com/repos/${repo.owner}/${repo.repo}/releases/latest`,
         { headers: { Accept: 'application/vnd.github+json' }, signal: controller.signal }
       );
-      if (res.status === 404) throw new Error('На GitHub пока нет опубликованных релизов');
+      if (res.status === 404) throw new Error(tr('На GitHub пока нет опубликованных релизов'));
       if (res.status === 403 || res.status === 429) {
-        throw new Error('Превышен лимит запросов GitHub, попробуйте позже');
+        throw new Error(tr('Превышен лимит запросов GitHub, попробуйте позже'));
       }
-      if (!res.ok) throw new Error(`GitHub вернул ошибку ${res.status}`);
+      if (!res.ok) throw new Error(tr`GitHub вернул ошибку ${res.status}`);
 
       const data = await res.json();
       const tag: string = String(data.tag_name || '');
@@ -155,12 +156,12 @@ export function useUpdateCheck(): UpdateCheck {
       setStatus('error');
       setErrorMessage(
         aborted
-          ? 'GitHub не отвечает, попробуйте позже'
+          ? tr('GitHub не отвечает, попробуйте позже')
           : offline
-            ? 'Нет подключения к интернету'
+            ? tr('Нет подключения к интернету')
             : e instanceof Error
               ? e.message
-              : 'Неизвестная ошибка'
+              : tr('Неизвестная ошибка')
       );
     } finally {
       clearTimeout(timer);

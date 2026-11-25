@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Читалка Книг</string>
-    <string name="title_activity_main">Читалка Книг</string>
+    <string name="app_name">BookSlut</string>
+    <string name="title_activity_main">BookSlut</string>
     <string name="package_name">com.ereader.material</string>
     <string name="custom_url_scheme">com.ereader.material</string>
 </resources>

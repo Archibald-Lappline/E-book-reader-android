@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import type { UpdateCheck } from '../utils/useUpdateCheck';
 import { ReaderThemeConfig } from '../types';
+import { tr } from '../i18n';
 
 export const SOURCE_CODE_REPO_URL = 'https://github.com/Archibald-Lappline/E-book-reader-android';
 
@@ -35,9 +36,9 @@ const UpdateSection: React.FC<{ update: UpdateCheck }> = ({ update }) => {
             <ArrowUpCircle className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <div className="text-sm font-bold">Доступна версия {latest.version}</div>
+            <div className="text-sm font-bold">{tr("Доступна версия")} {latest.version}</div>
             <div className="text-[11px] opacity-65">
-              {currentVersion ? `Установлена ${currentVersion}` : 'Есть новое обновление'}
+              {currentVersion ? tr`Установлена ${currentVersion}` : tr("Есть новое обновление")}
             </div>
           </div>
         </div>
@@ -54,7 +55,7 @@ const UpdateSection: React.FC<{ update: UpdateCheck }> = ({ update }) => {
           className="py-2.5 rounded-xl bg-amber-500 text-neutral-950 text-xs font-bold shadow-xs flex items-center justify-center gap-2 active:scale-95"
         >
           <Download className="w-4 h-4" />
-          Скачать обновление
+          {tr("Скачать обновление")}
         </a>
       </div>
     );
@@ -65,11 +66,11 @@ const UpdateSection: React.FC<{ update: UpdateCheck }> = ({ update }) => {
       <div id="update-section-uptodate" className={`${card} border-emerald-500/30 bg-emerald-500/10 !flex-row items-center`}>
         <CheckCircle2 className="w-5 h-5 text-emerald-500 shrink-0" />
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-bold">У вас последняя версия</div>
-          {currentVersion && <div className="text-[11px] opacity-65">Версия {currentVersion}</div>}
+          <div className="text-xs font-bold">{tr("У вас последняя версия")}</div>
+          {currentVersion && <div className="text-[11px] opacity-65">{tr("Версия")} {currentVersion}</div>}
         </div>
         <button id="btn-update-recheck" onClick={() => void check()} className={smallBtn}>
-          <RefreshCw className="w-3.5 h-3.5" /> Проверить
+          <RefreshCw className="w-3.5 h-3.5" /> {tr("Проверить")}
         </button>
       </div>
     );
@@ -79,7 +80,7 @@ const UpdateSection: React.FC<{ update: UpdateCheck }> = ({ update }) => {
     return (
       <div id="update-section-checking" className={`${card} border-inherit/25 bg-black/5 dark:bg-white/5 !flex-row items-center`}>
         <RefreshCw className="w-5 h-5 text-amber-500 shrink-0 animate-spin" />
-        <div className="text-xs font-semibold">Проверяем обновления…</div>
+        <div className="text-xs font-semibold">{tr("Проверяем обновления…")}</div>
       </div>
     );
   }
@@ -89,11 +90,11 @@ const UpdateSection: React.FC<{ update: UpdateCheck }> = ({ update }) => {
       <div id="update-section-error" className={`${card} border-red-500/30 bg-red-500/10 !flex-row items-center`}>
         <AlertTriangle className="w-5 h-5 text-red-400 shrink-0" />
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-bold">Не удалось проверить обновления</div>
+          <div className="text-xs font-bold">{tr("Не удалось проверить обновления")}</div>
           {errorMessage && <div className="text-[11px] opacity-65">{errorMessage}</div>}
         </div>
         <button id="btn-update-retry" onClick={() => void check()} className={smallBtn}>
-          <RefreshCw className="w-3.5 h-3.5" /> Повторить
+          <RefreshCw className="w-3.5 h-3.5" /> {tr("Повторить")}
         </button>
       </div>
     );
@@ -104,7 +105,7 @@ const UpdateSection: React.FC<{ update: UpdateCheck }> = ({ update }) => {
       <div id="update-section-unsupported" className={`${card} border-inherit/25 bg-black/5 dark:bg-white/5 !flex-row items-center`}>
         <Smartphone className="w-5 h-5 text-amber-500 shrink-0" />
         <div className="text-[11px] leading-relaxed opacity-75">
-          Проверка обновлений работает в установленном Android-приложении.
+          {tr("Проверка обновлений работает в установленном Android-приложении.")}
         </div>
       </div>
     );
@@ -114,9 +115,9 @@ const UpdateSection: React.FC<{ update: UpdateCheck }> = ({ update }) => {
   return (
     <div id="update-section-idle" className={`${card} border-inherit/25 bg-black/5 dark:bg-white/5 !flex-row items-center`}>
       <RefreshCw className="w-5 h-5 text-amber-500 shrink-0" />
-      <div className="text-xs font-semibold flex-1">Обновления</div>
+      <div className="text-xs font-semibold flex-1">{tr("Обновления")}</div>
       <button id="btn-update-check" onClick={() => void check()} className={smallBtn}>
-        Проверить
+        {tr("Проверить")}
       </button>
     </div>
   );
@@ -165,8 +166,8 @@ export const SourceCodeModal: React.FC<SourceCodeModalProps> = ({ theme, update,
               <Code2 className="w-4 h-4" />
             </div>
             <div>
-              <h2 className="text-sm sm:text-base font-bold">Открытый исходный код</h2>
-              <p className="text-[11px] opacity-65">Читалка Книг — проект с открытым кодом</p>
+              <h2 className="text-sm sm:text-base font-bold">{tr("Открытый исходный код")}</h2>
+              <p className="text-[11px] opacity-65">{tr("BookSlut — проект с открытым кодом")}</p>
             </div>
           </div>
           <button
@@ -180,8 +181,7 @@ export const SourceCodeModal: React.FC<SourceCodeModalProps> = ({ theme, update,
 
         <div className="px-5 py-5 flex flex-col gap-4 overflow-y-auto">
           <p className="text-xs leading-relaxed opacity-80">
-            Весь код приложения, история изменений и готовые сборки APK лежат в репозитории на
-            GitHub. Его можно читать, скачивать, форкать и предлагать правки.
+            {tr("Весь код приложения, история изменений и готовые сборки APK лежат в репозитории на GitHub. Его можно читать, скачивать, форкать и предлагать правки.")}
           </p>
 
           <UpdateSection update={update} />
@@ -198,7 +198,7 @@ export const SourceCodeModal: React.FC<SourceCodeModalProps> = ({ theme, update,
               <Github className="w-6 h-6" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-sm font-bold">Репозиторий на GitHub</div>
+              <div className="text-sm font-bold">{tr("Репозиторий на GitHub")}</div>
               <div className="text-[11px] opacity-65 truncate font-mono">{repoLabel}</div>
             </div>
             <ExternalLink className="w-4 h-4 text-amber-500 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
@@ -208,7 +208,7 @@ export const SourceCodeModal: React.FC<SourceCodeModalProps> = ({ theme, update,
           <div className="flex flex-wrap gap-2">
             {FACTS.map(({ icon: Icon, label }) => (
               <span
-                key={label}
+                key={tr(label)}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border border-inherit/25 bg-black/5 dark:bg-white/5"
               >
                 <Icon className="w-3.5 h-3.5 text-amber-500" />
@@ -227,14 +227,14 @@ export const SourceCodeModal: React.FC<SourceCodeModalProps> = ({ theme, update,
               className="flex-1 py-2.5 rounded-xl border border-inherit/25 hover:bg-black/5 dark:hover:bg-white/5 text-xs font-semibold flex items-center justify-center gap-2 transition-colors active:scale-95"
             >
               <Download className="w-4 h-4 text-amber-500" />
-              Скачать APK
+              {tr("Скачать APK")}
             </a>
             <button
               id="btn-source-code-done"
               onClick={onClose}
               className="flex-1 py-2.5 rounded-xl bg-amber-500 text-neutral-950 text-xs font-bold shadow-xs active:scale-95 cursor-pointer"
             >
-              Закрыть
+              {tr("Закрыть")}
             </button>
           </div>
         </div>

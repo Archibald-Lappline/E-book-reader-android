@@ -15,6 +15,7 @@ import {
 import { Note, Bookmark } from '../types';
 import { COLOR_NAMES_RU } from '../utils/highlight';
 import { exportFile } from '../utils/fileExport';
+import { tr } from '../i18n';
 
 interface NotesDrawerProps {
   bookTitle: string;
@@ -62,14 +63,14 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
 
   const handleExportMarkdown = async () => {
     if (notes.length === 0) return;
-    let md = `# Заметки и цитаты: ${bookTitle}\n\n`;
+    let md = tr`# Заметки и цитаты: ${bookTitle}\n\n`;
     notes.forEach((n, idx) => {
       md += `### ${idx + 1}. ${n.chapterTitle}\n`;
       md += `> «${n.selectedText}»\n\n`;
       if (n.noteText) {
-        md += `**Заметка:** ${n.noteText}\n\n`;
+        md += tr`**Заметка:** ${n.noteText}\n\n`;
       }
-      md += `*Дата: ${new Date(n.createdAt).toLocaleDateString()}*\n\n---\n\n`;
+      md += tr`*Дата: ${new Date(n.createdAt).toLocaleDateString()}*\n\n---\n\n`;
     });
 
     const safeFilename = `${bookTitle.replace(/[^\wа-яА-ЯёЁ\s-]/gi, '_')}-заметки.md`;
@@ -79,7 +80,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
         filename: safeFilename,
         content: md,
         mimeType: 'text/markdown',
-        title: `Заметки: ${bookTitle}`,
+        title: tr`Заметки: ${bookTitle}`,
       });
 
       setExportNotice(result.message);
@@ -87,7 +88,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
     } catch {
       // Fallback: Copy to clipboard
       await navigator.clipboard.writeText(md);
-      setExportNotice('Заметки скопированы в буфер обмена!');
+      setExportNotice(tr("Заметки скопированы в буфер обмена!"));
       setTimeout(() => setExportNotice(null), 3500);
     }
   };
@@ -121,7 +122,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
           <div className="min-w-0 flex-1">
             <h2 className="font-bold text-base flex items-center gap-2">
               <Edit3 className="w-4 h-4 text-amber-500 shrink-0" />
-              <span>Заметки и закладки</span>
+              <span>{tr("Заметки и закладки")}</span>
             </h2>
             <p className="text-xs opacity-60 truncate">{bookTitle}</p>
           </div>
@@ -129,7 +130,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
             id="btn-close-notes"
             onClick={onClose}
             className="p-2 min-w-[44px] min-h-[44px] rounded-full bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
-            title="Закрыть заметки"
+            title={tr("Закрыть заметки")}
           >
             <X className="w-5 h-5" />
           </button>
@@ -146,7 +147,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
             }`}
           >
             <Edit3 className="w-4 h-4" />
-            Заметки ({notes.length})
+            {tr`Заметки (${notes.length})`}
           </button>
           <button
             id="tab-bookmarks"
@@ -158,7 +159,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
             }`}
           >
             <BookmarkIcon className="w-4 h-4" />
-            Закладки ({bookmarks.length})
+            {tr`Закладки (${bookmarks.length})`}
           </button>
         </div>
 
@@ -169,7 +170,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
               <input
                 id="input-search-notes"
                 type="text"
-                placeholder="Поиск по цитатам и мыслям..."
+                placeholder={tr("Поиск по цитатам и мыслям...")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full pl-9 pr-3 py-1.5 text-xs rounded-xl bg-black/5 dark:bg-neutral-800 border border-inherit/30 focus:outline-hidden focus:border-amber-500"
@@ -177,7 +178,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
             </div>
             <div className="flex items-center gap-1.5 pt-1">
               <span className="text-[11px] opacity-60 mr-1 flex items-center gap-1">
-                <Tag className="w-3 h-3" /> Цвет:
+                <Tag className="w-3 h-3" /> {tr("Цвет:")}
               </span>
               <button
                 onClick={() => setSelectedColorFilter(null)}
@@ -185,13 +186,13 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
                   !selectedColorFilter ? 'bg-amber-500 text-white border-amber-500 font-bold' : 'opacity-60 hover:opacity-100 border-inherit'
                 }`}
               >
-                Все
+                {tr("Все")}
               </button>
               {['yellow', 'green', 'blue', 'pink', 'purple'].map((c) => (
                 <button
                   key={c}
                   onClick={() => setSelectedColorFilter(selectedColorFilter === c ? null : c)}
-                  title={COLOR_NAMES_RU[c] || c}
+                  title={tr(COLOR_NAMES_RU[c] || c)}
                   className={`w-4 h-4 rounded-full transition-transform cursor-pointer ${
                     c === 'yellow' ? 'bg-yellow-400' :
                     c === 'green' ? 'bg-emerald-400' :
@@ -206,9 +207,9 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
                   id="btn-export-notes"
                   onClick={handleExportMarkdown}
                   className="ml-auto text-[11px] flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-amber-500/10 text-amber-500 hover:bg-amber-500/20 font-semibold cursor-pointer transition-colors"
-                  title="Экспорт / Поделиться заметками"
+                  title={tr("Экспорт / Поделиться заметками")}
                 >
-                  <Share2 className="w-3.5 h-3.5" /> Экспорт
+                  <Share2 className="w-3.5 h-3.5" /> {tr("Экспорт")}
                 </button>
               )}
             </div>
@@ -226,9 +227,9 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
             filteredNotes.length === 0 ? (
               <div className="h-48 flex flex-col items-center justify-center text-center opacity-60 text-xs">
                 <Edit3 className="w-8 h-8 mb-2 stroke-1" />
-                <p>Пока нет заметок</p>
+                <p>{tr("Пока нет заметок")}</p>
                 <p className="text-[11px] mt-1 opacity-70">
-                  Выделите любой текст в книге, чтобы добавить заметку или цветную цитату!
+                  {tr("Выделите любой текст в книге, чтобы добавить заметку или цветную цитату!")}
                 </p>
               </div>
             ) : (
@@ -251,7 +252,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
                         colorBadges[note.color] || colorBadges.yellow
                       }`}
                     >
-                      {COLOR_NAMES_RU[note.color] || note.color}
+                      {tr(COLOR_NAMES_RU[note.color] || note.color)}
                     </span>
                   </div>
 
@@ -273,7 +274,7 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
                       <button
                         onClick={() => handleCopy(note.selectedText, note.id)}
                         className="p-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10"
-                        title="Скопировать"
+                        title={tr("Скопировать")}
                       >
                         {copiedNoteId === note.id ? (
                           <Check className="w-3.5 h-3.5 text-emerald-500" />
@@ -285,12 +286,12 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
                         onClick={() => onSelectNote(note)}
                         className="px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-500 font-semibold hover:bg-amber-500/25"
                       >
-                        Перейти
+                        {tr("Перейти")}
                       </button>
                       <button
                         onClick={() => onDeleteNote(note.id)}
                         className="p-1 text-rose-400 hover:text-rose-500 rounded-md"
-                        title="Удалить заметку"
+                        title={tr("Удалить заметку")}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -302,9 +303,9 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
           ) : bookmarks.length === 0 ? (
             <div className="h-48 flex flex-col items-center justify-center text-center opacity-60 text-xs">
               <BookmarkIcon className="w-8 h-8 mb-2 stroke-1" />
-              <p>Нет закладок</p>
+              <p>{tr("Нет закладок")}</p>
               <p className="text-[11px] mt-1 opacity-70">
-                Нажмите на иконку флажка в верхней панели чтения, чтобы сохранить место!
+                {tr("Нажмите на иконку флажка в верхней панели чтения, чтобы сохранить место!")}
               </p>
             </div>
           ) : (
@@ -322,21 +323,21 @@ export const NotesDrawer: React.FC<NotesDrawerProps> = ({
                 >
                   <p className="text-xs font-semibold">{bm.chapterTitle}</p>
                   <p className="text-[10px] opacity-60 mt-0.5">
-                    {new Date(bm.createdAt).toLocaleString()} · {Math.round(bm.progressPercent)}% прочитано
+                    {new Date(bm.createdAt).toLocaleString()} · {tr`${Math.round(bm.progressPercent)}% прочитано`}
                   </p>
                 </div>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => onSelectBookmark(bm)}
                     className="p-1.5 text-amber-500 hover:bg-amber-500/15 rounded-lg"
-                    title="Перейти к закладке"
+                    title={tr("Перейти к закладке")}
                   >
                     <BookOpen className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => onDeleteBookmark(bm.id)}
                     className="p-1.5 text-rose-400 hover:bg-rose-500/15 rounded-lg"
-                    title="Удалить закладку"
+                    title={tr("Удалить закладку")}
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>

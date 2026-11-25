@@ -5,10 +5,11 @@ import { useAudioPlayer } from '../../context/AudioPlayerContext';
 import { ReaderThemeConfig } from '../../types';
 import { formatAudioTime } from '../../services/audioStorage';
 import { Rewind15Icon, Forward15Icon } from './AudioIcons';
+import { tr } from '../../i18n';
 
 interface MiniAudioPlayerProps {
   theme: ReaderThemeConfig;
-  bottomOffset?: number; // e.g. above bottom nav bar
+  bottomOffset?: number | string; // e.g. above bottom nav bar
 }
 
 export const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
@@ -37,7 +38,7 @@ export const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
     <div
       id="mini-audio-player-container"
       className="fixed left-0 right-0 z-40 px-3 pointer-events-none select-none"
-      style={{ bottom: `${bottomOffset}px` }}
+      style={{ bottom: typeof bottomOffset === 'number' ? `${bottomOffset}px` : bottomOffset }}
     >
       <motion.div
         initial={{ y: 50, opacity: 0, scale: 0.96 }}
@@ -89,12 +90,12 @@ export const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 {sleepTimer.active && (
                   <span className="shrink-0 flex items-center gap-0.5 px-1.5 py-0.2 rounded-full bg-amber-500/20 text-amber-500 text-[9px] font-bold">
                     <Moon className="w-2.5 h-2.5" />
-                    {sleepTimer.mode === 'end_of_track' ? 'Конец' : `${Math.ceil(sleepTimer.remainingSeconds / 60)}м`}
+                    {sleepTimer.mode === 'end_of_track' ? tr("Конец") : tr`${Math.ceil(sleepTimer.remainingSeconds / 60)}м`}
                   </span>
                 )}
               </div>
               <p className="text-[11px] opacity-65 truncate mt-0.5 flex items-center gap-1.5">
-                <span>{currentCollection?.title || currentTrack.author || 'Аудиокнига'}</span>
+                <span>{currentCollection?.title || currentTrack.author || tr("Аудиокнига")}</span>
                 <span>•</span>
                 <span className="font-semibold text-amber-500">{progressPercent}%</span>
                 <span>({formatAudioTime(currentTime)})</span>
@@ -112,7 +113,7 @@ export const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               id="mini-player-rewind-15"
               onClick={() => seekDelta(-15)}
               className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 active:scale-90 transition-all cursor-pointer text-inherit opacity-85 hover:opacity-100"
-              title="Перемотать на 15 секунд назад"
+              title={tr("Перемотать на 15 секунд назад")}
             >
               <Rewind15Icon className="w-4.5 h-4.5" />
             </button>
@@ -126,7 +127,7 @@ export const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 backgroundColor: theme.accent,
                 color: theme.isDark ? '#000' : '#fff',
               }}
-              title={isPlaying ? 'Пауза' : 'Слушать'}
+              title={isPlaying ? tr("Пауза") : tr("Слушать")}
             >
               {isPlaying ? (
                 <Pause className="w-5 h-5 fill-current" />
@@ -140,7 +141,7 @@ export const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
               id="mini-player-forward-15"
               onClick={() => seekDelta(15)}
               className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 active:scale-90 transition-all cursor-pointer text-inherit opacity-85 hover:opacity-100"
-              title="Перемотать на 15 секунд вперёд"
+              title={tr("Перемотать на 15 секунд вперёд")}
             >
               <Forward15Icon className="w-4.5 h-4.5" />
             </button>
@@ -153,7 +154,7 @@ export const MiniAudioPlayer: React.FC<MiniAudioPlayerProps> = ({
                 closePlayer();
               }}
               className="w-7 h-7 ml-0.5 rounded-full flex items-center justify-center hover:bg-red-500/20 text-neutral-400 hover:text-red-400 active:scale-90 transition-all cursor-pointer"
-              title="Закрыть плеер"
+              title={tr("Закрыть плеер")}
             >
               <X className="w-4 h-4" />
             </button>

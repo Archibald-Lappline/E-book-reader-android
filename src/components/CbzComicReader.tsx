@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Chapter, ReaderThemeConfig } from '../types';
 import { getComicArchive, getComicPages } from '../services/storage';
+import { tr } from '../i18n';
 
 interface CbzComicReaderProps {
   bookId?: string;
@@ -548,7 +549,7 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
             <img
               ref={imageRef}
               src={currentImageUrl}
-              alt={`Страница ${currentPage + 1}`}
+              alt={tr`Страница ${currentPage + 1}`}
               draggable={false}
               decoding="async"
               loading="eager"
@@ -568,13 +569,13 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
           <div className="flex flex-col items-center justify-center gap-3">
             <Loader2 className="w-8 h-8 text-amber-500 animate-spin" />
             <p className="text-sm font-medium opacity-70">
-              Загрузка страницы {currentPage + 1}...
+              {tr("Загрузка страницы")} {currentPage + 1}...
             </p>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center opacity-60 text-sm gap-2">
             <Sparkles className="w-8 h-8 text-amber-500" />
-            <p>Страница {currentPage + 1} не найдена в архиве</p>
+            <p>{tr`Страница ${currentPage + 1} не найдена в архиве`}</p>
           </div>
         )}
       </div>
@@ -598,7 +599,7 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
             onClick={zoomOut}
             disabled={scale <= 1}
             className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 active:scale-95 disabled:opacity-30 transition-all cursor-pointer"
-            title="Отдалить (Ctrl -)"
+            title={tr("Отдалить (Ctrl -)")}
           >
             <ZoomOut className="w-4 h-4" />
           </button>
@@ -612,7 +613,7 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
                 ? 'bg-amber-500 text-neutral-950 shadow-xs'
                 : 'hover:bg-black/5 dark:hover:bg-white/5 opacity-80'
             }`}
-            title="Сбросить масштаб (100%)"
+            title={tr("Сбросить масштаб (100%)")}
           >
             {Math.round(scale * 100)}%
           </button>
@@ -623,7 +624,7 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
             onClick={zoomIn}
             disabled={scale >= 4.5}
             className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 active:scale-95 disabled:opacity-30 transition-all cursor-pointer"
-            title="Приблизить (Ctrl +)"
+            title={tr("Приблизить (Ctrl +)")}
           >
             <ZoomIn className="w-4 h-4" />
           </button>
@@ -636,7 +637,7 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
             onClick={handlePrevPage}
             disabled={currentPage <= 0}
             className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 active:scale-95 disabled:opacity-30 transition-all cursor-pointer"
-            title="Предыдущая страница (←)"
+            title={tr("Предыдущая страница (←)")}
           >
             <ChevronLeft className="w-4 h-4" />
           </button>
@@ -646,7 +647,7 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
             id="btn-comic-page-scrubber-toggle"
             onClick={() => setShowPageScrubber((prev) => !prev)}
             className="px-2 py-0.5 rounded-lg text-xs font-semibold hover:bg-black/5 dark:hover:bg-white/5 transition-all cursor-pointer flex items-center gap-1"
-            title="Открыть переход по страницам"
+            title={tr("Открыть переход по страницам")}
           >
             <span>{currentPage + 1}</span>
             <span className="opacity-50">/</span>
@@ -659,7 +660,7 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
             onClick={handleNextPage}
             disabled={currentPage >= effectiveTotalPages - 1}
             className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 active:scale-95 disabled:opacity-30 transition-all cursor-pointer"
-            title="Следующая страница (→)"
+            title={tr("Следующая страница (→)")}
           >
             <ChevronRight className="w-4 h-4" />
           </button>
@@ -671,7 +672,7 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
             id="btn-comic-fit-mode"
             onClick={() => setFitMode((prev) => (prev === 'contain' ? 'width' : 'contain'))}
             className="p-1.5 rounded-full hover:bg-black/10 dark:hover:bg-white/10 active:scale-95 transition-all cursor-pointer hidden sm:block opacity-75 hover:opacity-100"
-            title={fitMode === 'contain' ? 'По ширине экрана' : 'По высоте экрана'}
+            title={fitMode === 'contain' ? tr("По ширине экрана") : tr("По высоте экрана")}
           >
             {fitMode === 'contain' ? (
               <Maximize2 className="w-3.5 h-3.5" />
@@ -704,10 +705,10 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
               <div className="flex items-center justify-between text-xs font-bold">
                 <span className="flex items-center gap-1.5">
                   <Sliders className="w-4 h-4 text-amber-500" />
-                  Переход по страницам комикса
+                  {tr("Переход по страницам комикса")}
                 </span>
                 <span className="font-mono text-amber-500">
-                  Страница {currentPage + 1} из {effectiveTotalPages}
+                  {tr`Страница ${currentPage + 1} из ${effectiveTotalPages}`}
                 </span>
               </div>
 
@@ -722,11 +723,11 @@ export const CbzComicReader: React.FC<CbzComicReaderProps> = ({
               />
 
               <div className="flex justify-between items-center pt-1 text-[11px] opacity-65">
-                <span>1: Начало</span>
+                <span>{tr("1: Начало")}</span>
                 <span>
-                  {Math.round(((currentPage + 1) / effectiveTotalPages) * 100)}% прочитано
+                  {tr`${Math.round(((currentPage + 1) / effectiveTotalPages) * 100)}% прочитано`}
                 </span>
-                <span>{effectiveTotalPages}: Конец</span>
+                <span>{tr`${effectiveTotalPages}: Конец`}</span>
               </div>
             </motion.div>
           </div>

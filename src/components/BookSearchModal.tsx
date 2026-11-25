@@ -2,6 +2,7 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, X, ChevronRight, BookOpen, ChevronUp, ChevronDown } from 'lucide-react';
 import { Chapter } from '../types';
+import { tr } from '../i18n';
 
 interface SearchMatch {
   chapterIndex: number;
@@ -49,7 +50,7 @@ export const BookSearchModal: React.FC<BookSearchModalProps> = ({
       const text = tempDiv.textContent || tempDiv.innerText || '';
       return {
         index: idx,
-        title: ch.title || `Глава ${idx + 1}`,
+        title: ch.title || tr`Глава ${idx + 1}`,
         text,
       };
     });
@@ -148,7 +149,7 @@ export const BookSearchModal: React.FC<BookSearchModalProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs font-bold text-amber-500">
               <Search className="w-4 h-4" />
-              <span>Поиск по книге</span>
+              <span>{tr("Поиск по книге")}</span>
             </div>
             <button
               onClick={onClose}
@@ -176,7 +177,7 @@ export const BookSearchModal: React.FC<BookSearchModalProps> = ({
                   onClose();
                 }
               }}
-              placeholder="Введите слово или фразу для поиска..."
+              placeholder={tr("Введите слово или фразу для поиска...")}
               className={`w-full pl-9 pr-24 py-2.5 rounded-2xl text-xs sm:text-sm font-medium border focus:outline-hidden transition-colors ${
                 isDark
                   ? 'bg-neutral-800 border-neutral-700 text-white placeholder-neutral-500 focus:border-amber-500'
@@ -196,14 +197,14 @@ export const BookSearchModal: React.FC<BookSearchModalProps> = ({
                     <button
                       onClick={handlePrevMatch}
                       className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10"
-                      title="Предыдущее совпадение"
+                      title={tr("Предыдущее совпадение")}
                     >
                       <ChevronUp className="w-3.5 h-3.5" />
                     </button>
                     <button
                       onClick={handleNextMatch}
                       className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10"
-                      title="Следующее совпадение"
+                      title={tr("Следующее совпадение")}
                     >
                       <ChevronDown className="w-3.5 h-3.5" />
                     </button>
@@ -215,9 +216,9 @@ export const BookSearchModal: React.FC<BookSearchModalProps> = ({
 
           {query.trim().length >= 2 && (
             <div className="flex items-center justify-between text-[11px] opacity-70 px-1">
-              <span>Найдено совпадений: <strong className="text-amber-500">{matches.length}</strong></span>
+              <span>{tr("Найдено совпадений:")} <strong className="text-amber-500">{matches.length}</strong></span>
               {matches.length > 0 && (
-                <span>Выбрано: {selectedMatchIdx + 1} из {matches.length}</span>
+                <span>{tr("Выбрано:")} {tr`${selectedMatchIdx + 1} из ${matches.length}`}</span>
               )}
             </div>
           )}
@@ -228,11 +229,11 @@ export const BookSearchModal: React.FC<BookSearchModalProps> = ({
           {query.trim().length < 2 ? (
             <div className="py-12 text-center opacity-50 text-xs flex flex-col items-center gap-2">
               <Search className="w-8 h-8 opacity-40 stroke-1" />
-              <span>Введите хотя бы 2 символа для поиска</span>
+              <span>{tr("Введите хотя бы 2 символа для поиска")}</span>
             </div>
           ) : matches.length === 0 ? (
             <div className="py-12 text-center opacity-60 text-xs">
-              По запросу «{query}» ничего не найдено
+              {tr`По запросу «${query}» ничего не найдено`}
             </div>
           ) : (
             matches.map((match, idx) => {
@@ -262,7 +263,7 @@ export const BookSearchModal: React.FC<BookSearchModalProps> = ({
                     </span>
                     {isCurrentChapter && (
                       <span className="px-1.5 py-0.2 rounded-sm bg-amber-500/20 text-amber-500 text-[9px] font-bold">
-                        Текущая глава
+                        {tr("Текущая глава")}
                       </span>
                     )}
                   </div>

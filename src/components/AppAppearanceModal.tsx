@@ -1,8 +1,9 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { X, Palette, Sun, Moon, Sparkles, Touchpad, PartyPopper } from 'lucide-react';
+import { X, Palette, Sun, Moon, Sparkles, Touchpad, PartyPopper, Languages } from 'lucide-react';
 import { ReaderSettings, ReaderThemeId } from '../types';
 import { READER_THEMES } from '../utils/themeConfig';
+import { tr, getLanguage, AppLanguage } from '../i18n';
 
 interface AppAppearanceModalProps {
   settings: ReaderSettings;
@@ -62,8 +63,8 @@ export const AppAppearanceModal: React.FC<AppAppearanceModalProps> = ({
                 <Palette className="w-4 h-4" />
               </div>
               <div>
-                <h2 className="text-sm sm:text-base font-bold">Оформление приложения</h2>
-                <p className="text-[11px] opacity-65">Цветовая тема, яркость и эффекты</p>
+                <h2 className="text-sm sm:text-base font-bold">{tr("Оформление приложения")}</h2>
+                <p className="text-[11px] opacity-65">{tr("Цветовая тема, яркость и эффекты")}</p>
               </div>
             </div>
             <button
@@ -76,10 +77,40 @@ export const AppAppearanceModal: React.FC<AppAppearanceModalProps> = ({
           </div>
 
           <div className="p-5 space-y-6 overflow-y-auto">
+            {/* App language */}
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider opacity-70 flex items-center gap-1.5 mb-2.5">
+                <Languages className="w-3.5 h-3.5" />
+                {tr("Язык приложения")}
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { id: 'ru', label: 'Русский' },
+                  { id: 'en', label: 'English' },
+                ] as Array<{ id: AppLanguage; label: string }>).map((lang) => {
+                  const isSelected = (settings.appLanguage || getLanguage()) === lang.id;
+                  return (
+                      <button
+                          key={lang.id}
+                          id={`btn-app-language-${lang.id}`}
+                          onClick={() => onUpdateSettings({ appLanguage: lang.id })}
+                          className={`py-2.5 px-3 rounded-xl border text-sm font-bold transition-all cursor-pointer active:scale-95 ${
+                              isSelected
+                                  ? 'border-amber-500 bg-amber-500/15 text-amber-500'
+                                  : 'border-inherit/30 opacity-75 hover:opacity-100'
+                          }`}
+                      >
+                        {lang.label}
+                      </button>
+                  );
+                })}
+              </div>
+            </div>
+
             {/* Theme selector */}
             <div>
               <label className="text-xs font-semibold uppercase tracking-wider opacity-70 block mb-3">
-                Цветовая тема (для всего приложения)
+                {tr("Цветовая тема (для всего приложения)")}
               </label>
               <div className="grid grid-cols-4 sm:grid-cols-7 gap-2">
                 {(Object.keys(READER_THEMES) as ReaderThemeId[]).map((themeKey) => {
@@ -104,10 +135,10 @@ export const AppAppearanceModal: React.FC<AppAppearanceModalProps> = ({
                               borderColor: theme.border,
                             }}
                         >
-                          Аа
+                          {tr("Аа")}
                         </div>
                         <span className="text-[10px] font-medium mt-1.5 text-center truncate max-w-full">
-                      {theme.name}
+                      {tr(theme.name)}
                     </span>
                       </button>
                   );
@@ -120,7 +151,7 @@ export const AppAppearanceModal: React.FC<AppAppearanceModalProps> = ({
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-semibold uppercase tracking-wider opacity-70 flex items-center gap-1.5">
                   <Sun className="w-3.5 h-3.5" />
-                  Яркость экрана
+                  {tr("Яркость экрана")}
                 </label>
                 <span className="text-xs font-mono font-medium">{settings.brightness}%</span>
               </div>
@@ -143,14 +174,14 @@ export const AppAppearanceModal: React.FC<AppAppearanceModalProps> = ({
             <div>
               <label className="text-xs font-semibold uppercase tracking-wider opacity-70 flex items-center gap-1.5 mb-2.5">
                 <Sparkles className="w-3.5 h-3.5" />
-                Анимация перелистывания страниц
+                {tr("Анимация перелистывания страниц")}
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 {[
-                  { id: 'flip', label: '3D-книга', desc: 'Объёмный лист с тенью' },
-                  { id: 'slide', label: 'Сдвиг', desc: 'Скольжение листа' },
-                  { id: 'fade', label: 'Выцветание', desc: 'Мягкий переход' },
-                  { id: 'none', label: 'Без анимации', desc: 'Мгновенно' },
+                  { id: 'flip', label: tr("3D-книга"), desc: tr("Объёмный лист с тенью") },
+                  { id: 'slide', label: tr("Сдвиг"), desc: tr("Скольжение листа") },
+                  { id: 'fade', label: tr("Выцветание"), desc: tr("Мягкий переход") },
+                  { id: 'none', label: tr("Без анимации"), desc: tr("Мгновенно") },
                 ].map((item) => {
                   const isSelected = (settings.pageTransition || 'flip') === item.id;
                   return (
@@ -180,11 +211,11 @@ export const AppAppearanceModal: React.FC<AppAppearanceModalProps> = ({
                     <Touchpad className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold">Листание тапом по краям</h4>
+                    <h4 className="text-xs font-bold">{tr("Листание тапом по краям")}</h4>
                     <p className="text-[10px] opacity-65">
                       {settings.tapToTurnPages !== false
-                          ? 'Включено: нажатие на край экрана меняет страницу'
-                          : 'Отключено: страницы листаются только жестом смахивания (свайпом)'}
+                          ? tr("Включено: нажатие на край экрана меняет страницу")
+                          : tr("Отключено: страницы листаются только жестом смахивания (свайпом)")}
                     </p>
                   </div>
                 </div>
@@ -196,7 +227,7 @@ export const AppAppearanceModal: React.FC<AppAppearanceModalProps> = ({
                     className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                         settings.tapToTurnPages !== false ? 'bg-amber-500' : 'bg-neutral-600/40'
                     }`}
-                    title="Переключить листание тапом"
+                    title={tr("Переключить листание тапом")}
                 >
                 <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-xs transition-transform ${
@@ -215,11 +246,11 @@ export const AppAppearanceModal: React.FC<AppAppearanceModalProps> = ({
                     <PartyPopper className="w-4.5 h-4.5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold">Поздравление на 67-й странице</h4>
+                    <h4 className="text-xs font-bold">{tr("Поздравление на 67-й странице")}</h4>
                     <p className="text-[10px] opacity-65">
                       {settings.showPageMilestone !== false
-                          ? 'Включено: окно с гифкой на каждой 67-й странице книги'
-                          : 'Отключено: окно на 67-й странице не показывается'}
+                          ? tr("Включено: окно с гифкой на каждой 67-й странице книги")
+                          : tr("Отключено: окно на 67-й странице не показывается")}
                     </p>
                   </div>
                 </div>
@@ -231,7 +262,7 @@ export const AppAppearanceModal: React.FC<AppAppearanceModalProps> = ({
                     className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                         settings.showPageMilestone !== false ? 'bg-amber-500' : 'bg-neutral-600/40'
                     }`}
-                    title="Переключить поздравление на 67-й странице"
+                    title={tr("Переключить поздравление на 67-й странице")}
                 >
                 <span
                     className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-xs transition-transform ${

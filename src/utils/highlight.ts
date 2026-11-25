@@ -1,4 +1,5 @@
 import { Note } from '../types';
+import { tr } from '../i18n';
 
 export const COLOR_NAMES_RU: Record<string, string> = {
   yellow: 'Жёлтый',
@@ -165,7 +166,7 @@ function wrapTextNodeSlice(
   mark.setAttribute('data-note-id', note.id);
   mark.setAttribute(
     'title',
-    note.noteText ? `Заметка: ${note.noteText}` : 'Выделенная цитата'
+    note.noteText ? tr`Заметка: ${note.noteText}` : tr("Выделенная цитата")
   );
 
   parent.replaceChild(mark, middleNode);

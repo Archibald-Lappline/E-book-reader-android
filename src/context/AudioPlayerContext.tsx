@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useRef, useCallb
 import { AudiobookTrack, AudiobookCollection } from '../types';
 import { updateTrackProgress, getAudioTrackById } from '../services/audioStorage';
 import { pushBackHandler } from '../utils/androidBackNavigation';
+import { tr } from '../i18n';
 
 export interface SleepTimerState {
   active: boolean;
@@ -351,8 +352,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       try {
         navigator.mediaSession.metadata = new MediaMetadata({
           title: currentTrack.title,
-          artist: currentTrack.author || currentCollection?.author || 'Аудиокнига',
-          album: currentCollection?.title || 'Читалка Книг',
+          artist: currentTrack.author || currentCollection?.author || tr("Аудиокнига"),
+          album: currentCollection?.title || 'BookSlut',
           artwork: cover
             ? [
                 { src: cover, sizes: '96x96', type: 'image/png' },
@@ -401,8 +402,8 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
       try {
         (window as any).AndroidMediaBridge.updateMediaMetadata(
           currentTrack.title,
-          currentTrack.author || currentCollection?.author || 'Аудиокнига',
-          currentCollection?.title || 'Читалка Книг',
+          currentTrack.author || currentCollection?.author || tr("Аудиокнига"),
+          currentCollection?.title || 'BookSlut',
           cover
         );
       } catch (e) {

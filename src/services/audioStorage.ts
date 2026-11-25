@@ -1,4 +1,5 @@
 import { AudiobookTrack, AudiobookCollection } from '../types';
+import { tr } from '../i18n';
 
 const DB_NAME = 'AndroidAudioReaderDB';
 const DB_VERSION = 1;
@@ -347,9 +348,9 @@ export function getAudioFileDuration(file: File | Blob): Promise<number> {
  * Format bytes to readable string (e.g. 24.5 МБ)
  */
 export function formatBytes(bytes: number): string {
-  if (bytes === 0) return '0 Б';
+  if (bytes === 0) return tr("0 Б");
   const k = 1024;
-  const sizes = ['Б', 'КБ', 'МБ', 'ГБ'];
+  const sizes = [tr("Б"), tr("КБ"), tr("МБ"), tr("ГБ")];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
 }

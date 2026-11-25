@@ -2,6 +2,7 @@ import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowUpCircle, X, ChevronRight } from 'lucide-react';
 import { ReaderThemeConfig } from '../types';
+import { tr } from '../i18n';
 
 interface UpdateBannerProps {
   theme: ReaderThemeConfig;
@@ -45,9 +46,9 @@ export const UpdateBanner: React.FC<UpdateBannerProps> = ({
           <ArrowUpCircle className="w-5 h-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-xs font-bold truncate">Доступна версия {version}</div>
+          <div className="text-xs font-bold truncate">{tr("Доступна версия")} {version}</div>
           <div className="text-[11px] opacity-65 truncate">
-            {currentVersion ? `У вас ${currentVersion} · ` : ''}нажмите, чтобы посмотреть
+            {currentVersion ? tr`У вас ${currentVersion} · ` : ''}{tr("нажмите, чтобы посмотреть")}
           </div>
         </div>
         <ChevronRight className="w-4 h-4 opacity-50 shrink-0" />
@@ -56,7 +57,7 @@ export const UpdateBanner: React.FC<UpdateBannerProps> = ({
         id="btn-update-banner-dismiss"
         onClick={onDismiss}
         className="p-2 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer shrink-0"
-        title="Скрыть"
+        title={tr("Скрыть")}
       >
         <X className="w-4 h-4" />
       </button>

@@ -57,6 +57,7 @@ import {EditCollectionModal} from './EditCollectionModal';
 import {EditTrackModal} from './EditTrackModal';
 import {BatchCollectionPickerModal} from './BatchCollectionPickerModal';
 import {pushBackHandler} from '../../utils/androidBackNavigation';
+import { tr } from '../../i18n';
 
 interface CollectionTrackItemProps {
     track: AudiobookTrack;
@@ -188,7 +189,7 @@ const CollectionTrackItem: React.FC<CollectionTrackItemProps> = ({
                     controls.start(e);
                 }}
                 className="touch-none cursor-grab active:cursor-grabbing p-1.5 -ml-1 text-neutral-400 hover:text-amber-500 active:text-amber-500 shrink-0 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
-                title="Зажмите и перетащите для изменения порядка"
+                title={tr("Зажмите и перетащите для изменения порядка")}
             >
                 <GripVertical className="w-4 h-4"/>
             </div>
@@ -216,7 +217,7 @@ const CollectionTrackItem: React.FC<CollectionTrackItemProps> = ({
                             ? 'bg-amber-500 text-neutral-950'
                             : 'bg-black/5 dark:bg-white/10 hover:bg-amber-500 hover:text-neutral-950'
                     }`}
-                    title={isCur && isPlaying ? 'Пауза' : 'Слушать'}
+                    title={isCur && isPlaying ? tr("Пауза") : tr("Слушать")}
                 >
                     {isCur && isPlaying ? (
                         <Pause className="w-4 h-4 fill-current"/>
@@ -246,7 +247,7 @@ const CollectionTrackItem: React.FC<CollectionTrackItemProps> = ({
                         <span>{formatAudioTime(track.duration)}</span>
                         <span>•</span>
                         <span className="font-semibold text-amber-500">
-              {track.progressPercent}% прослушано
+              {tr`${track.progressPercent}% прослушано`}
             </span>
                         <span className="text-[10px] opacity-60">({track.fileSize})</span>
                     </div>
@@ -269,7 +270,7 @@ const CollectionTrackItem: React.FC<CollectionTrackItemProps> = ({
                             onMoveUp();
                         }}
                         className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
-                        title="Переместить выше"
+                        title={tr("Переместить выше")}
                     >
                         <ArrowUp className="w-3 h-3"/>
                     </button>
@@ -280,7 +281,7 @@ const CollectionTrackItem: React.FC<CollectionTrackItemProps> = ({
                             onMoveDown();
                         }}
                         className="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 disabled:opacity-20 cursor-pointer disabled:cursor-not-allowed"
-                        title="Переместить ниже"
+                        title={tr("Переместить ниже")}
                     >
                         <ArrowDown className="w-3 h-3"/>
                     </button>
@@ -292,7 +293,7 @@ const CollectionTrackItem: React.FC<CollectionTrackItemProps> = ({
                         onEdit();
                     }}
                     className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 opacity-60 hover:opacity-100 transition-colors cursor-pointer"
-                    title="Редактировать аудиозапись"
+                    title={tr("Редактировать аудиозапись")}
                 >
                     <Edit2 className="w-4 h-4"/>
                 </button>
@@ -309,6 +310,8 @@ interface AudiobookLibraryViewProps {
     onOpenSync?: () => void;
     bottomPadding?: number;
     onIsAtRootChange?: (isAtRoot: boolean) => void;
+    /** true, когда открыт сборник (а не главный экран аудиокниг) */
+    onCollectionOpenChange?: (isOpen: boolean) => void;
 }
 
 export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
@@ -319,6 +322,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                                                               onOpenSync,
                                                                               bottomPadding = 90,
                                                                               onIsAtRootChange,
+                                                                              onCollectionOpenChange,
                                                                           }) => {
     const isDark = theme.isDark;
     const [showAppearanceModal, setShowAppearanceModal] = useState(false);
@@ -400,6 +404,10 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
     useEffect(() => {
         onIsAtRootChange?.(isAtRoot);
     }, [isAtRoot, onIsAtRootChange]);
+
+    useEffect(() => {
+        onCollectionOpenChange?.(selectedCollectionId !== null);
+    }, [selectedCollectionId, onCollectionOpenChange]);
     const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth <= 768);
 
     useEffect(() => {
@@ -523,7 +531,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
         const ids = Array.from<string>(selectedTrackIds);
         if (ids.length === 0) return;
         await moveTracksToCollection(ids, null);
-        showToast(`Убрано из сборника: ${ids.length} аудиозаписей`);
+        showToast(tr`Убрано из сборника: ${ids.length} аудиозаписей`);
         clearSelection();
         await loadData();
     }, [selectedTrackIds, clearSelection, loadData]);
@@ -532,7 +540,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
         const ids = Array.from<string>(selectedTrackIds);
         if (ids.length === 0) return;
         await moveTracksToCollection(ids, colId);
-        showToast(`Перемещено в сборник: ${ids.length} аудиозаписей`);
+        showToast(tr`Перемещено в сборник: ${ids.length} аудиозаписей`);
         setShowBatchCollectionPicker(false);
         clearSelection();
         await loadData();
@@ -551,7 +559,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
         };
         await saveAudioCollection(newCol);
         await moveTracksToCollection(ids, newCol.id);
-        showToast(`Создан сборник «${title}» и добавлено ${ids.length} аудиозаписей`);
+        showToast(tr`Создан сборник «${title}» и добавлено ${ids.length} аудиозаписей`);
         setShowBatchCollectionPicker(false);
         clearSelection();
         await loadData();
@@ -561,7 +569,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
         const ids = Array.from<string>(selectedTrackIds);
         if (ids.length === 0) return;
         await resetTracksProgress(ids);
-        showToast(`Прогресс сброшен на 0% для ${ids.length} аудиозаписей`);
+        showToast(tr`Прогресс сброшен на 0% для ${ids.length} аудиозаписей`);
         clearSelection();
         await loadData();
     }, [selectedTrackIds, clearSelection, loadData]);
@@ -569,9 +577,9 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
     const handleBatchDeleteTracks = useCallback(async () => {
         const ids = Array.from<string>(selectedTrackIds);
         if (ids.length === 0) return;
-        if (window.confirm(`Удалить выбранные аудиофайлы (${ids.length} шт.) из памяти?`)) {
+        if (window.confirm(tr`Удалить выбранные аудиофайлы (${ids.length} шт.) из памяти?`)) {
             await deleteMultipleAudioTracks(ids);
-            showToast(`Удалено: ${ids.length} аудиозаписей`);
+            showToast(tr`Удалено: ${ids.length} аудиозаписей`);
             clearSelection();
             await loadData();
         }
@@ -651,13 +659,13 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                     .replace(/\.[^/.]+$/, '')
                     .replace(/^[0-9]+[_\-\s.]+/, '')
                     .replace(/[_-]+/g, ' ')
-                    .trim() || `Аудиозапись ${baseOrder + i + 1}`;
+                    .trim() || tr`Аудиозапись ${baseOrder + i + 1}`;
 
                 const newTrack: AudiobookTrack = {
                     id: `track-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
                     collectionId: targetColId || undefined,
                     title: cleanName,
-                    author: activeCollection?.author || 'Автор не указан',
+                    author: activeCollection?.author || tr("Автор не указан"),
                     fileName: file.name,
                     fileSize: formatBytes(file.size),
                     audioBlob: file,
@@ -729,6 +737,18 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
         fileInputRef.current?.click();
     };
 
+    // Кнопки из меню «+» в центре нижней панели (App.tsx)
+    useEffect(() => {
+        const onAdd = () => handleOpenUploadPicker(selectedCollectionId || undefined);
+        const onCreate = () => setIsCreatingCollection(true);
+        window.addEventListener('audiobooks:add-audiobook', onAdd);
+        window.addEventListener('audiobooks:create-collection', onCreate);
+        return () => {
+            window.removeEventListener('audiobooks:add-audiobook', onAdd);
+            window.removeEventListener('audiobooks:create-collection', onCreate);
+        };
+    });
+
     const handleSaveCollection = async (colData: Partial<AudiobookCollection>) => {
         if (editingCollection) {
             const updated: AudiobookCollection = {
@@ -740,7 +760,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
         } else {
             const newCol: AudiobookCollection = {
                 id: `col-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-                title: colData.title || 'Новый сборник',
+                title: colData.title || tr("Новый сборник"),
                 author: colData.author || '',
                 description: colData.description || '',
                 coverUrl: colData.coverUrl,
@@ -810,7 +830,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
         }
 
         if (!chosenTrack) {
-            showToast('В сборнике нет аудиофайлов для воспроизведения');
+            showToast(tr("В сборнике нет аудиофайлов для воспроизведения"));
             return;
         }
 
@@ -839,7 +859,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
             style={{
                 backgroundColor: theme.bg,
                 color: theme.text,
-                paddingBottom: `${bottomPadding}px`,
+                paddingBottom: `calc(${bottomPadding}px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)))`,
             }}
         >
             <input
@@ -868,7 +888,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                 id="btn-back-to-collections"
                                 onClick={() => setSelectedCollectionId(null)}
                                 className="w-10 h-10 min-w-[40px] rounded-2xl border border-inherit/20 hover:bg-black/10 dark:hover:bg-white/10 active:scale-95 flex items-center justify-center transition-all cursor-pointer shadow-xs"
-                                title="Назад к сборникам"
+                                title={tr("Назад к сборникам")}
                             >
                                 <ArrowLeft className="w-5 h-5"/>
                             </button>
@@ -877,7 +897,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                     {activeCollection.title}
                                 </h2>
                                 <p className="text-[11px] opacity-65 truncate">
-                                    {activeCollection.author || 'Сборник аудиокниг'}
+                                    {activeCollection.author || tr("Сборник аудиокниг")}
                                 </p>
                             </div>
                         </div>
@@ -887,7 +907,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                 id="btn-edit-collection-details"
                                 onClick={() => setEditingCollection(activeCollection)}
                                 className="p-2 rounded-xl border border-inherit/20 hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer shadow-xs"
-                                title="Редактировать сборник"
+                                title={tr("Редактировать сборник")}
                             >
                                 <Edit2 className="w-4 h-4 opacity-75"/>
                             </button>
@@ -906,7 +926,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                         backgroundColor: theme.accent,
                                         color: isDark ? '#000' : '#fff',
                                     }}
-                                    title="Настройки темы и оформления приложения"
+                                    title={tr("Настройки темы и оформления приложения")}
                                 >
                                     <Headphones className="w-5 h-5"/>
                                 </button>
@@ -918,15 +938,15 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                         borderColor: theme.border,
                                         color: theme.text,
                                     }}
-                                    title="Количество сборников и аудиофайлов в библиотеке"
+                                    title={tr("Количество сборников и аудиофайлов в библиотеке")}
                                 >
                                     <span className="font-bold">{collections.length}</span>
                                     <span className="opacity-70 font-normal">
-                    {collections.length === 1 ? 'сборник' : collections.length < 5 ? 'сборника' : 'сборников'}
+                    {collections.length === 1 ? tr("сборник") : collections.length < 5 ? tr("сборника") : tr("сборников")}
                   </span>
                                     <span className="opacity-40">•</span>
                                     <span className="font-bold">{tracks.length}</span>
-                                    <span className="opacity-70 font-normal">аудио</span>
+                                    <span className="opacity-70 font-normal">{tr("аудио")}</span>
                                 </div>
                             </div>
 
@@ -936,10 +956,10 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                         id="btn-open-source-code-audio"
                                         onClick={onOpenSourceCode}
                                         className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs active:scale-95 cursor-pointer"
-                                        title="Исходный код на GitHub"
+                                        title={tr("Исходный код на GitHub")}
                                     >
                                         <Github className="w-4 h-4 shrink-0"/>
-                                        <span className="hidden sm:inline">Исходный код</span>
+                                        <span className="hidden sm:inline">{tr("Исходный код")}</span>
                                     </button>
                                 )}
 
@@ -947,7 +967,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                     id="btn-refresh-audiobooks"
                                     onClick={() => loadData()}
                                     className="p-1.5 sm:p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 text-amber-500 transition-colors active:scale-95 cursor-pointer"
-                                    title="Обновить список аудиокниг"
+                                    title={tr("Обновить список аудиокниг")}
                                 >
                                     <RefreshCw className="w-4 h-4"/>
                                 </button>
@@ -967,7 +987,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                 <input
                                     id="input-audio-search"
                                     type="text"
-                                    placeholder="Поиск аудиокниг по названию или автору..."
+                                    placeholder={tr("Поиск аудиокниг по названию или автору...")}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                     className="w-full bg-transparent outline-none text-xs sm:text-sm placeholder:opacity-50"
@@ -998,7 +1018,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                             : 'opacity-70 hover:opacity-100'
                                     }`}
                                 >
-                                    Сборники ({collections.length})
+                                    {tr`Сборники (${collections.length})`}
                                 </button>
                                 <button
                                     id="tab-btn-all-tracks"
@@ -1009,7 +1029,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                             : 'opacity-70 hover:opacity-100'
                                     }`}
                                 >
-                                    Все записи ({tracks.length})
+                                    {tr`Все записи (${tracks.length})`}
                                 </button>
                             </div>
                         </div>
@@ -1021,7 +1041,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                 <div
                     className="px-4 py-2 bg-amber-500/20 text-amber-500 text-xs font-bold flex items-center justify-center gap-2 border-b border-amber-500/30 animate-pulse">
                     <Upload className="w-4 h-4 animate-bounce"/>
-                    <span>Обработка и сохранение аудиофайлов в память...</span>
+                    <span>{tr("Обработка и сохранение аудиофайлов в память...")}</span>
                 </div>
             )}
 
@@ -1053,7 +1073,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                         <div className="flex-1 text-center sm:text-left min-w-0">
               <span
                   className="text-[10px] font-bold tracking-wider uppercase text-amber-500 bg-amber-500/10 px-2.5 py-0.5 rounded-full inline-block mb-1.5">
-                Сборник аудиокниг
+                {tr("Сборник аудиокниг")}
               </span>
                             <h2 className="text-lg sm:text-xl font-bold leading-snug">
                                 {activeCollection.title}
@@ -1079,16 +1099,16 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                             className="px-4 py-2 rounded-2xl bg-amber-500 text-neutral-950 hover:bg-amber-400 active:scale-95 text-xs font-bold transition-all shadow-md cursor-pointer flex items-center gap-2 disabled:opacity-50"
                                         >
                                             <Play className="w-4 h-4 fill-current"/>
-                                            <span>{stats.progress > 0 ? 'Продолжить' : 'Слушать'}</span>
+                                            <span>{stats.progress > 0 ? tr("Продолжить") : tr("Слушать")}</span>
                                         </button>
 
                                         <div className="text-xs opacity-75 flex items-center gap-2">
-                                            <span>{stats.count} томов/глав</span>
+                                            <span>{tr`${stats.count} томов/глав`}</span>
                                             <span>•</span>
                                             <span>{formatAudioTime(stats.totalDuration)}</span>
                                             <span>•</span>
                                             <span
-                                                className="font-bold text-amber-500">{stats.progress}% прослушано</span>
+                                                className="font-bold text-amber-500">{tr`${stats.progress}% прослушано`}</span>
                                         </div>
                                     </div>
                                 );
@@ -1099,14 +1119,14 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                     <div className="space-y-2">
                         <div className="flex items-center justify-between px-1">
                             <h3 className="text-xs font-bold opacity-75 uppercase tracking-wider">
-                                Содержимое сборника ({activeCollectionTracks.length})
+                                {tr`Содержимое сборника (${activeCollectionTracks.length})`}
                             </h3>
                             <div className="flex items-center gap-2">
                                 <button
                                     onClick={() => handleOpenUploadPicker(selectedCollectionId)}
                                     className="text-xs text-amber-500 font-bold hover:underline cursor-pointer flex items-center gap-1"
                                 >
-                                    <Plus className="w-3.5 h-3.5"/> Добавить том
+                                    <Plus className="w-3.5 h-3.5"/> {tr("Добавить том")}
                                 </button>
                             </div>
                         </div>
@@ -1121,16 +1141,16 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                     <Music className="w-6 h-6 opacity-60"/>
                                 </div>
                                 <div>
-                                    <h4 className="text-sm font-bold">Сборник пуст</h4>
+                                    <h4 className="text-sm font-bold">{tr("Сборник пуст")}</h4>
                                     <p className="text-xs opacity-60 mt-1 max-w-xs">
-                                        Загрузите тома или аудиозаписи (.mp3, .m4a, .aac) прямо в этот сборник
+                                        {tr("Загрузите тома или аудиозаписи (.mp3, .m4a, .aac) прямо в этот сборник")}
                                     </p>
                                 </div>
                                 <button
                                     onClick={() => handleOpenUploadPicker(selectedCollectionId)}
                                     className="px-4 py-2 rounded-xl bg-amber-500 text-neutral-950 font-bold text-xs hover:bg-amber-400 cursor-pointer shadow-xs"
                                 >
-                                    Загрузить аудиофайлы
+                                    {tr("Загрузить аудиофайлы")}
                                 </button>
                             </div>
                         ) : (
@@ -1139,7 +1159,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                     <div
                                         className="flex items-center gap-1.5 text-[11px] opacity-60 px-1 py-0.5 select-none">
                                         <GripVertical className="w-3.5 h-3.5 text-amber-500 shrink-0"/>
-                                        <span>Потяните за значок слева для перетаскивания и смены очередности аудиофайлов</span>
+                                        <span>{tr("Потяните за значок слева для перетаскивания и смены очередности аудиофайлов")}</span>
                                     </div>
                                 )}
                                 <Reorder.Group
@@ -1193,16 +1213,16 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                         <FolderPlus className="w-7 h-7 opacity-60"/>
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-bold">Нет сборников</h4>
+                                        <h4 className="text-sm font-bold">{tr("Нет сборников")}</h4>
                                         <p className="text-xs opacity-60 mt-1 max-w-sm">
-                                            Создайте сборник для объединения томов книги или загрузите аудиофайлы
+                                            {tr("Создайте сборник для объединения томов книги или загрузите аудиофайлы")}
                                         </p>
                                     </div>
                                     <button
                                         onClick={() => setIsCreatingCollection(true)}
                                         className="px-4 py-2 rounded-xl bg-amber-500 text-neutral-950 font-bold text-xs hover:bg-amber-400 cursor-pointer shadow-xs"
                                     >
-                                        Создать первый сборник
+                                        {tr("Создать первый сборник")}
                                     </button>
                                 </div>
                             ) : (
@@ -1239,7 +1259,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
 
                                                     <div className="flex-1 min-w-0">
                             <span className="text-[10px] font-bold tracking-wider uppercase text-amber-500">
-                              {stats.count} томов
+                              {tr`${stats.count} томов`}
                             </span>
                                                         <h3 className="text-xs sm:text-sm font-bold truncate leading-tight mt-0.5">
                                                             {col.title}
@@ -1257,7 +1277,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                                 <div className="mt-4 pt-3 border-t border-inherit/15">
                                                     <div
                                                         className="flex items-center justify-between text-[11px] font-bold mb-1">
-                                                        <span className="opacity-70">Прослушано</span>
+                                                        <span className="opacity-70">{tr("Прослушано")}</span>
                                                         <span className="text-amber-500">{stats.progress}%</span>
                                                     </div>
                                                     <div
@@ -1278,7 +1298,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                                             className="px-3 py-1.5 rounded-xl bg-amber-500 text-neutral-950 font-bold text-xs hover:bg-amber-400 active:scale-95 transition-all flex items-center gap-1.5 shadow-2xs disabled:opacity-50"
                                                         >
                                                             <Play className="w-3.5 h-3.5 fill-current"/>
-                                                            <span>{stats.progress > 0 ? 'Продолжить' : 'Слушать'}</span>
+                                                            <span>{stats.progress > 0 ? tr("Продолжить") : tr("Слушать")}</span>
                                                         </button>
 
                                                         <button
@@ -1287,7 +1307,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                                                 setEditingCollection(col);
                                                             }}
                                                             className="p-1.5 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 opacity-70 hover:opacity-100 transition-colors"
-                                                            title="Настройки сборника"
+                                                            title={tr("Настройки сборника")}
                                                         >
                                                             <Edit2 className="w-3.5 h-3.5"/>
                                                         </button>
@@ -1311,23 +1331,23 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                         <Music className="w-7 h-7 opacity-60"/>
                                     </div>
                                     <div>
-                                        <h4 className="text-sm font-bold">Нет загруженных аудиозаписей</h4>
+                                        <h4 className="text-sm font-bold">{tr("Нет загруженных аудиозаписей")}</h4>
                                         <p className="text-xs opacity-60 mt-1 max-w-sm">
-                                            Нажмите «Загрузить», чтобы добавить файлы аудиокниг (.mp3, .m4a, .aac)
+                                            {tr("Нажмите «Загрузить», чтобы добавить файлы аудиокниг (.mp3, .m4a, .aac)")}
                                         </p>
                                     </div>
                                     <button
                                         onClick={() => handleOpenUploadPicker()}
                                         className="px-4 py-2 rounded-xl bg-amber-500 text-neutral-950 font-bold text-xs hover:bg-amber-400 cursor-pointer shadow-xs"
                                     >
-                                        Загрузить аудиофайлы
+                                        {tr("Загрузить аудиофайлы")}
                                     </button>
                                 </div>
                             ) : (
                                 <>
                                     <div className="flex items-center justify-between px-1 mb-1">
                     <span className="text-xs font-bold opacity-75 uppercase tracking-wider">
-                      Все аудиозаписи ({filteredTracks.length})
+                      {tr`Все аудиозаписи (${filteredTracks.length})`}
                     </span>
                                     </div>
 
@@ -1436,7 +1456,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                                                 <span>{formatAudioTime(track.duration)}</span>
                                                                 <span>•</span>
                                                                 <span className="font-semibold text-amber-500">
-                                  {track.progressPercent}% прослушано
+                                  {tr`${track.progressPercent}% прослушано`}
                                 </span>
                                                             </div>
 
@@ -1456,7 +1476,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                                             setEditingTrack(track);
                                                         }}
                                                         className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 opacity-60 hover:opacity-100 transition-colors cursor-pointer shrink-0"
-                                                        title="Редактировать"
+                                                        title={tr("Редактировать")}
                                                     >
                                                         <Edit2 className="w-4 h-4"/>
                                                     </button>
@@ -1468,39 +1488,6 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                             )}
                         </div>
                     )}
-                </div>
-            )}
-
-            {!selectedCollectionId && !isSelectionMode && selectedTrackIds.size === 0 && (
-                <div
-                    className="absolute right-5 sm:right-6 z-30 flex flex-col items-end gap-2.5 transition-all duration-200 pointer-events-auto select-none"
-                    style={{
-                        bottom: currentTrack ? '142px' : '82px',
-                    }}
-                >
-                    <motion.button
-                        whileHover={{scale: 1.04}}
-                        whileTap={{scale: 0.95}}
-                        id="btn-fab-create-collection"
-                        onClick={() => setIsCreatingCollection(true)}
-                        className="h-11 px-4 rounded-2xl bg-neutral-900 text-amber-400 dark:bg-neutral-800 dark:text-amber-400 border border-amber-500/35 font-bold text-xs shadow-lg shadow-black/25 flex items-center gap-2 transition-all cursor-pointer hover:bg-neutral-800 dark:hover:bg-neutral-700 active:scale-95"
-                        title="Создать новый сборник"
-                    >
-                        <FolderPlus className="w-4 h-4 text-amber-500"/>
-                        <span className="tracking-tight">Создать сборник</span>
-                    </motion.button>
-
-                    <motion.button
-                        whileHover={{scale: 1.05}}
-                        whileTap={{scale: 0.95}}
-                        id="btn-fab-add-audiobook"
-                        onClick={() => handleOpenUploadPicker()}
-                        className="h-14 px-5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold shadow-xl shadow-amber-500/30 flex items-center gap-2.5 transition-all group cursor-pointer"
-                        title="Добавить аудиокнигу (MP3, M4B, AAC, FLAC)"
-                    >
-                        <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-200"/>
-                        <span className="text-sm font-bold tracking-tight">Добавить аудиокнигу</span>
-                    </motion.button>
                 </div>
             )}
 
@@ -1567,13 +1554,13 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                     <div className="min-w-0 flex-1">
                                         <h3 className="font-bold text-base leading-snug">
                                             {duplicateWarning.duplicates.length === 1
-                                                ? 'Этот аудиофайл уже есть в приложении'
-                                                : 'Найдены повторяющиеся аудиофайлы'}
+                                                ? tr("Этот аудиофайл уже есть в приложении")
+                                                : tr("Найдены повторяющиеся аудиофайлы")}
                                         </h3>
                                         <p className="text-xs opacity-75 mt-1 leading-relaxed">
                                             {duplicateWarning.duplicates.length === 1
-                                                ? 'Выбранный аудиофайл уже сохранён в вашей медиатеке. Вы хотите пропустить дубликат или загрузить его повторно?'
-                                                : `Обнаружено ${duplicateWarning.duplicates.length} файлов, которые уже загружены в приложение.`}
+                                                ? tr("Выбранный аудиофайл уже сохранён в вашей медиатеке. Вы хотите пропустить дубликат или загрузить его повторно?")
+                                                : tr`Обнаружено ${duplicateWarning.duplicates.length} файлов, которые уже загружены в приложение.`}
                                         </p>
                                     </div>
                                 </div>
@@ -1595,12 +1582,12 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                                 <p className="text-[10px] opacity-60 flex items-center gap-1 mt-0.5">
                                                     <span>{formatBytes(item.file.size)}</span>
                                                     <span>•</span>
-                                                    <span>Уже в: {item.existingTrack.title}</span>
+                                                    <span>{tr("Уже в:")} {item.existingTrack.title}</span>
                                                 </p>
                                             </div>
                                             <span
                                                 className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-500 shrink-0">
-                        Дубликат
+                        {tr("Дубликат")}
                       </span>
                                         </div>
                                     ))}
@@ -1610,7 +1597,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                     <p className="text-xs text-emerald-500 font-semibold flex items-center gap-1.5">
                                         <CheckCircle2 className="w-3.5 h-3.5"/>
                                         <span>
-                      Также выбрано {duplicateWarning.newFiles.length} новых уникальных файлов
+                      {tr`Также выбрано ${duplicateWarning.newFiles.length} новых уникальных файлов`}
                     </span>
                                     </p>
                                 )}
@@ -1627,7 +1614,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                             }}
                                             className="flex-1 py-2.5 px-3 rounded-xl bg-amber-500 text-neutral-950 font-bold text-xs hover:bg-amber-400 active:scale-95 transition-all shadow-xs cursor-pointer text-center"
                                         >
-                                            Загрузить только новые ({duplicateWarning.newFiles.length})
+                                            {tr`Загрузить только новые (${duplicateWarning.newFiles.length})`}
                                         </button>
                                     ) : (
                                         <button
@@ -1638,7 +1625,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                             }}
                                             className="flex-1 py-2.5 px-3 rounded-xl bg-amber-500 text-neutral-950 font-bold text-xs hover:bg-amber-400 active:scale-95 transition-all shadow-xs cursor-pointer text-center"
                                         >
-                                            Не загружать дубликат
+                                            {tr("Не загружать дубликат")}
                                         </button>
                                     )}
 
@@ -1659,7 +1646,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                                 : 'border-stone-300 hover:bg-black/5 text-stone-700'
                                         }`}
                                     >
-                                        Всё равно добавить
+                                        {tr("Всё равно добавить")}
                                     </button>
 
                                     <button
@@ -1670,7 +1657,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                         }}
                                         className="py-2.5 px-3 rounded-xl text-xs font-semibold opacity-60 hover:opacity-100 transition-opacity cursor-pointer text-center"
                                     >
-                                        Отмена
+                                        {tr("Отмена")}
                                     </button>
                                 </div>
                             </motion.div>
@@ -1700,7 +1687,7 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                     exit={{y: 60, opacity: 0}}
                                     id="audio-batch-action-bar"
                                     className="fixed left-3 right-3 sm:left-auto sm:right-6 sm:w-auto max-w-xl mx-auto z-40 p-2 sm:p-2.5 rounded-3xl bg-neutral-950/95 text-white border border-neutral-800 shadow-2xl backdrop-blur-md flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 select-none"
-                                    style={{bottom: `${bottomPadding + 8}px`}}
+                                    style={{bottom: `calc(${bottomPadding + 8}px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)))`}}
                                 >
                                     <div className="flex items-center gap-1.5 pl-1.5 sm:pl-2 shrink-0">
                     <span className="text-[11px] font-bold bg-amber-500 text-neutral-950 px-2 py-0.5 rounded-full">
@@ -1709,9 +1696,9 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                         <button
                                             onClick={() => toggleSelectAll(currentVisibleTracks)}
                                             className="text-[11px] font-semibold opacity-80 hover:opacity-100 underline decoration-dotted cursor-pointer px-1"
-                                            title={isAllSelected ? 'Снять выделение со всех' : 'Выделить все видимые аудиозаписи'}
+                                            title={isAllSelected ? tr("Снять выделение со всех") : tr("Выделить все видимые аудиозаписи")}
                                         >
-                                            {isAllSelected ? 'Снять' : 'Все'}
+                                            {isAllSelected ? tr("Снять") : tr("Все")}
                                         </button>
                                     </div>
 
@@ -1722,10 +1709,10 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                             id="btn-batch-add-collection"
                                             onClick={() => setShowBatchCollectionPicker(true)}
                                             className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-amber-400"
-                                            title="Добавить выбранные файлы в сборник"
+                                            title={tr("Добавить выбранные файлы в сборник")}
                                         >
                                             <FolderInput className="w-3.5 h-3.5"/>
-                                            <span className="hidden sm:inline">В сборник</span>
+                                            <span className="hidden sm:inline">{tr("В сборник")}</span>
                                         </button>
 
                                         {hasAnyInCollection && (
@@ -1733,10 +1720,10 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                                 id="btn-batch-remove-collection"
                                                 onClick={handleBatchRemoveFromCollection}
                                                 className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-amber-300"
-                                                title="Убрать выбранные файлы из сборника"
+                                                title={tr("Убрать выбранные файлы из сборника")}
                                             >
                                                 <FolderMinus className="w-3.5 h-3.5"/>
-                                                <span className="hidden sm:inline">Из сборника</span>
+                                                <span className="hidden sm:inline">{tr("Из сборника")}</span>
                                             </button>
                                         )}
 
@@ -1744,27 +1731,27 @@ export const AudiobookLibraryView: React.FC<AudiobookLibraryViewProps> = ({
                                             id="btn-batch-reset-progress"
                                             onClick={handleBatchResetProgress}
                                             className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-sky-400"
-                                            title="Сбросить прогресс на 0%"
+                                            title={tr("Сбросить прогресс на 0%")}
                                         >
                                             <RotateCcw className="w-3.5 h-3.5"/>
-                                            <span className="hidden sm:inline">Сброс</span>
+                                            <span className="hidden sm:inline">{tr("Сброс")}</span>
                                         </button>
 
                                         <button
                                             id="btn-batch-delete"
                                             onClick={handleBatchDeleteTracks}
                                             className="px-2.5 py-1.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/40 text-rose-300 active:scale-95 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                                            title="Удалить выбранные файлы из библиотеки"
+                                            title={tr("Удалить выбранные файлы из библиотеки")}
                                         >
                                             <Trash2 className="w-3.5 h-3.5"/>
-                                            <span className="hidden sm:inline">Удалить</span>
+                                            <span className="hidden sm:inline">{tr("Удалить")}</span>
                                         </button>
 
                                         {/* Закрыть выбор */}
                                         <button
                                             onClick={clearSelection}
                                             className="p-1.5 rounded-xl hover:bg-white/10 opacity-70 hover:opacity-100 transition-colors cursor-pointer ml-0.5"
-                                            title="Закрыть панель выбора"
+                                            title={tr("Закрыть панель выбора")}
                                         >
                                             <X className="w-4 h-4"/>
                                         </button>

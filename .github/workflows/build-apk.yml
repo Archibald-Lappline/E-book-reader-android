@@ -60,12 +60,6 @@ jobs:
             keytool -genkeypair -v -keystore android/app/release-key.jks -alias material-ereader -keyalg RSA -keysize 2048 -validity 10000 -storepass material123 -keypass material123 -dname "CN=Material EReader, OU=Mobile, O=OpenSource, L=Global, ST=Global, C=RU"
           fi
 
-      - name: Resolve App Version from Git Tag
-        run: |
-          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            echo "APP_VERSION_NAME=${GITHUB_REF_NAME#v}" >> "$GITHUB_ENV"
-          fi
-
       - name: Build Signed Debug APK
         run: |
           cd android

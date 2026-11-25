@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, List, CheckCircle2 } from 'lucide-react';
 import { Chapter } from '../types';
+import { tr } from '../i18n';
 
 interface TocDrawerProps {
   chapters: Chapter[];
@@ -39,13 +40,13 @@ export const TocDrawer: React.FC<TocDrawerProps> = ({
         <div className="p-4 border-b border-inherit/30 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <List className="w-5 h-5 text-amber-500" />
-            <h2 className="font-bold text-base">Оглавление</h2>
+            <h2 className="font-bold text-base">{tr("Оглавление")}</h2>
           </div>
           <button
             id="btn-close-toc"
             onClick={onClose}
             className="p-2 min-w-[44px] min-h-[44px] rounded-full bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20 active:scale-95 transition-all flex items-center justify-center cursor-pointer shrink-0"
-            title="Закрыть оглавление"
+            title={tr("Закрыть оглавление")}
           >
             <X className="w-5 h-5" />
           </button>

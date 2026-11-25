@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Edit3, Copy, Check, X } from 'lucide-react';
 import { Note } from '../types';
+import { tr } from '../i18n';
 
 export interface SelectionPosition {
   top: number;
@@ -63,11 +64,11 @@ export const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
   };
 
   const colors: Array<{ id: Note['color']; bg: string; name: string }> = [
-    { id: 'yellow', bg: 'bg-yellow-400', name: 'Жёлтый' },
-    { id: 'green', bg: 'bg-emerald-400', name: 'Зелёный' },
-    { id: 'blue', bg: 'bg-sky-400', name: 'Голубой' },
-    { id: 'pink', bg: 'bg-pink-400', name: 'Розовый' },
-    { id: 'purple', bg: 'bg-purple-400', name: 'Фиолетовый' },
+    { id: 'yellow', bg: 'bg-yellow-400', name: tr("Жёлтый") },
+    { id: 'green', bg: 'bg-emerald-400', name: tr("Зелёный") },
+    { id: 'blue', bg: 'bg-sky-400', name: tr("Голубой") },
+    { id: 'pink', bg: 'bg-pink-400', name: tr("Розовый") },
+    { id: 'purple', bg: 'bg-purple-400', name: tr("Фиолетовый") },
   ];
 
   const selectedColorObj = colors.find((c) => c.id === selectedColor) || colors[0];
@@ -153,7 +154,7 @@ export const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
           <div className="p-1.5 w-72 sm:w-80 space-y-2.5">
             <div className="flex items-center justify-between text-xs font-bold text-amber-400">
               <span className="flex items-center gap-1.5">
-                <Edit3 className="w-3.5 h-3.5" /> Заметка к цитате
+                <Edit3 className="w-3.5 h-3.5" /> {tr("Заметка к цитате")}
               </span>
               <button
                 type="button"
@@ -163,7 +164,7 @@ export const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
                   handleCloseNoteInput();
                 }}
                 className="p-1 rounded-md hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-                title="Отмена"
+                title={tr("Отмена")}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -174,7 +175,7 @@ export const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
               rows={3}
               value={noteText}
               onChange={(e) => setNoteText(e.target.value)}
-              placeholder="Введите комментарий или мысль..."
+              placeholder={tr("Введите комментарий или мысль...")}
               className="w-full text-xs p-2.5 rounded-xl bg-neutral-800/90 border border-neutral-700 text-white placeholder:text-neutral-500 focus:outline-hidden focus:border-amber-500 resize-none transition-colors"
               onPointerDown={(e) => e.stopPropagation()}
               onKeyDown={(e) => {
@@ -212,7 +213,7 @@ export const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
                 }}
                 className="px-3.5 py-1.5 rounded-xl bg-amber-500 text-neutral-950 text-xs font-bold hover:bg-amber-400 active:scale-95 transition-all shadow-xs cursor-pointer"
               >
-                Сохранить
+                {tr("Сохранить")}
               </button>
             </div>
           </div>
@@ -231,7 +232,7 @@ export const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
                     onClose();
                   }}
                   className={`w-5.5 h-5.5 rounded-full ${c.bg} hover:scale-120 active:scale-95 transition-transform shadow-xs cursor-pointer`}
-                  title={`Выделить цветом: ${c.name}`}
+                  title={tr`Выделить цветом: ${c.name}`}
                 />
               ))}
             </div>
@@ -245,10 +246,10 @@ export const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
                 handleOpenNoteInput();
               }}
               className="p-1.5 rounded-xl hover:bg-white/15 text-neutral-200 active:scale-95 transition-all flex items-center gap-1.5 text-xs px-2.5 font-semibold cursor-pointer"
-              title="Добавить заметку к выделенному тексту"
+              title={tr("Добавить заметку к выделенному тексту")}
             >
               <Edit3 className="w-3.5 h-3.5 text-amber-400" />
-              <span>Заметка</span>
+              <span>{tr("Заметка")}</span>
             </button>
 
             <button
@@ -260,7 +261,7 @@ export const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
                 handleCopy();
               }}
               className="p-1.5 rounded-xl hover:bg-white/15 text-neutral-200 active:scale-95 transition-all cursor-pointer"
-              title="Скопировать цитату"
+              title={tr("Скопировать цитату")}
             >
               {copied ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
             </button>
@@ -274,7 +275,7 @@ export const TextSelectionToolbar: React.FC<TextSelectionToolbarProps> = ({
                 onClose();
               }}
               className="p-1.5 rounded-xl hover:bg-white/15 text-neutral-400 hover:text-white transition-colors cursor-pointer"
-              title="Закрыть"
+              title={tr("Закрыть")}
             >
               <X className="w-4 h-4" />
             </button>

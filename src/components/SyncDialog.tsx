@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { createFullBackupJson, restoreFromBackupJson } from '../services/storage';
 import { exportFile } from '../utils/fileExport';
+import { tr } from '../i18n';
 
 interface SyncDialogProps {
   onClose: () => void;
@@ -26,7 +27,7 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
 }) => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [syncSuccess, setSyncSuccess] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<string>('Только что');
+  const [lastSyncTime, setLastSyncTime] = useState<string>(tr("Только что"));
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const handleManualSync = () => {
@@ -51,7 +52,7 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
         filename,
         content: json,
         mimeType: 'application/json',
-        title: 'Резервная копия библиотеки',
+        title: tr("Резервная копия библиотеки"),
       });
 
       if (result.success) {
@@ -62,7 +63,7 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
         setErrorMsg(result.message);
       }
     } catch (err) {
-      setErrorMsg('Ошибка при экспорте резервной копии');
+      setErrorMsg(tr("Ошибка при экспорте резервной копии"));
     }
   };
 
@@ -85,7 +86,7 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
             onClose();
           }, 1500);
         } else {
-          setErrorMsg('Неверный формат файла синхронизации');
+          setErrorMsg(tr("Неверный формат файла синхронизации"));
         }
       }
     };
@@ -111,7 +112,7 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
               <RefreshCw className={`w-5 h-5 ${isSyncing ? 'animate-spin' : ''}`} />
             </div>
             <div>
-              <h2 className="font-bold text-base">Синхронизация прогресса</h2>
+              <h2 className="font-bold text-base">{tr("Синхронизация прогресса")}</h2>
               <p className="text-xs opacity-60">Android Cloud & Local Room Store</p>
             </div>
           </div>
@@ -129,10 +130,10 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
             <div className="flex items-center gap-3">
               <div className="w-3 h-3 rounded-full bg-emerald-500 shadow-xs shadow-emerald-500/50 animate-pulse" />
               <div>
-                <p className="text-xs font-bold text-amber-400">Прогресс чтения сохранен</p>
+                <p className="text-xs font-bold text-amber-400">{tr("Прогресс чтения сохранен")}</p>
                 <p className="text-[11px] opacity-70 flex items-center gap-1 mt-0.5">
                   <Clock className="w-3 h-3" />
-                  Последняя синхронизация: {lastSyncTime}
+                  {tr("Последняя синхронизация:")} {lastSyncTime}
                 </p>
               </div>
             </div>
@@ -143,14 +144,14 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
               className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 active:scale-95 text-neutral-900 text-xs font-bold shadow-md transition-all flex items-center gap-1.5"
             >
               <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
-              {isSyncing ? 'Синхронизация...' : 'Обновить'}
+              {isSyncing ? tr("Синхронизация...") : tr("Обновить")}
             </button>
           </div>
 
           {syncSuccess && (
             <div className="mt-3 text-xs text-emerald-400 flex items-center gap-1.5 font-medium">
               <CheckCircle2 className="w-4 h-4" />
-              Библиотека, закладки и заметки успешно синхронизированы!
+              {tr("Библиотека, закладки и заметки успешно синхронизированы!")}
             </div>
           )}
 
@@ -163,11 +164,11 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
           <div className="flex items-center gap-3 p-3 rounded-2xl bg-black/5 dark:bg-neutral-800/50 border border-inherit/20">
             <Smartphone className="w-5 h-5 text-amber-500 opacity-80" />
             <div className="flex-1">
-              <p className="font-semibold">Локальное хранилище (Offline-First)</p>
-              <p className="text-[11px] opacity-60">Все книги, шрифты и цитаты доступны без интернета</p>
+              <p className="font-semibold">{tr("Локальное хранилище (Offline-First)")}</p>
+              <p className="text-[11px] opacity-60">{tr("Все книги, шрифты и цитаты доступны без интернета")}</p>
             </div>
             <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-400 font-semibold">
-              АКТИВНО
+              {tr("АКТИВНО")}
             </span>
           </div>
 
@@ -178,8 +179,8 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
               className="p-3 rounded-2xl border border-inherit/30 hover:bg-black/5 dark:hover:bg-neutral-800 transition-colors flex flex-col items-center text-center gap-1.5"
             >
               <Download className="w-5 h-5 text-amber-500" />
-              <span className="font-semibold">Экспорт копии</span>
-              <span className="text-[10px] opacity-60">Скачать файл .json с прогрессом и заметками</span>
+              <span className="font-semibold">{tr("Экспорт копии")}</span>
+              <span className="text-[10px] opacity-60">{tr("Скачать файл .json с прогрессом и заметками")}</span>
             </button>
 
             <label
@@ -187,8 +188,8 @@ export const SyncDialog: React.FC<SyncDialogProps> = ({
               className="p-3 rounded-2xl border border-inherit/30 hover:bg-black/5 dark:hover:bg-neutral-800 transition-colors flex flex-col items-center text-center gap-1.5 cursor-pointer"
             >
               <Upload className="w-5 h-5 text-amber-500" />
-              <span className="font-semibold">Импорт копии</span>
-              <span className="text-[10px] opacity-60">Восстановить прогресс с другого устройства</span>
+              <span className="font-semibold">{tr("Импорт копии")}</span>
+              <span className="text-[10px] opacity-60">{tr("Восстановить прогресс с другого устройства")}</span>
               <input
                 type="file"
                 accept=".json"

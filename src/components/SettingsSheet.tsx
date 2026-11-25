@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { ReaderSettings, ReaderFontFamily } from '../types';
 import { READER_THEMES, FONT_OPTIONS } from '../utils/themeConfig';
+import { tr } from '../i18n';
 
 interface SettingsSheetProps {
   settings: ReaderSettings;
@@ -51,7 +52,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
         <div className="flex items-center justify-between pb-4 border-b border-inherit/40">
           <div className="flex items-center gap-2">
             <Type className="w-5 h-5 text-amber-500" />
-            <h2 className="text-base sm:text-lg font-bold">Настройки шрифта и текста</h2>
+            <h2 className="text-base sm:text-lg font-bold">{tr("Настройки шрифта и текста")}</h2>
           </div>
           <button
             id="btn-close-settings"
@@ -68,7 +69,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
           {/* Font Family */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider opacity-70 block mb-2.5">
-              Гарнитура шрифта
+              {tr("Гарнитура шрифта")}
             </label>
             <div className="grid grid-cols-2 gap-2">
               {FONT_OPTIONS.map((font) => {
@@ -91,7 +92,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
                     }`}
                   >
                     <span className="text-sm">{font.name}</span>
-                    <span className="text-[11px] opacity-60 font-sans mt-0.5">{font.preview}</span>
+                    <span className="text-[11px] opacity-60 font-sans mt-0.5">{tr(font.preview)}</span>
                   </button>
                 );
               })}
@@ -103,7 +104,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold uppercase tracking-wider opacity-70">
-                  Размер шрифта
+                  {tr("Размер шрифта")}
                 </span>
                 <span className="text-xs font-mono font-bold text-amber-500">
                   {settings.fontSize} px
@@ -116,7 +117,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
                   className={`p-2 min-w-[38px] min-h-[38px] flex items-center justify-center rounded-lg border cursor-pointer ${
                     isDark ? 'border-neutral-700 bg-neutral-800' : 'border-stone-300 bg-white'
                   }`}
-                  title="Уменьшить шрифт"
+                  title={tr("Уменьшить шрифт")}
                 >
                   <Minus className="w-4 h-4" />
                 </button>
@@ -135,7 +136,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
                   className={`p-2 min-w-[38px] min-h-[38px] flex items-center justify-center rounded-lg border cursor-pointer ${
                     isDark ? 'border-neutral-700 bg-neutral-800' : 'border-stone-300 bg-white'
                   }`}
-                  title="Увеличить шрифт"
+                  title={tr("Увеличить шрифт")}
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -145,7 +146,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
             <div>
               <div className="flex items-center justify-between mb-2">
                 <span className="text-xs font-semibold uppercase tracking-wider opacity-70">
-                  Межстрочный интервал
+                  {tr("Межстрочный интервал")}
                 </span>
                 <span className="text-xs font-mono font-medium">
                   {settings.lineHeight.toFixed(1)}x
@@ -170,7 +171,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
           {/* Text Alignment */}
           <div>
             <label className="text-xs font-semibold uppercase tracking-wider opacity-70 block mb-2">
-              Выравнивание текста
+              {tr("Выравнивание текста")}
             </label>
             <div className="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-black/10 dark:bg-neutral-800/60 border border-inherit/30">
               <button
@@ -183,7 +184,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
                 }`}
               >
                 <AlignJustify className="w-3.5 h-3.5" />
-                По ширине
+                {tr("По ширине")}
               </button>
               <button
                 id="btn-align-left"
@@ -195,7 +196,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
                 }`}
               >
                 <AlignLeft className="w-3.5 h-3.5" />
-                По левому краю
+                {tr("По левому краю")}
               </button>
             </div>
           </div>
@@ -204,7 +205,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
           <div>
             <div className="flex items-center justify-between mb-1.5">
               <span className="text-xs font-semibold uppercase tracking-wider opacity-70">
-                Поля страницы (отступы)
+                {tr("Поля страницы (отступы)")}
               </span>
               <span className="text-xs font-mono font-medium">{settings.marginHorizontal} px</span>
             </div>
@@ -227,11 +228,11 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
                   <Touchpad className="w-4.5 h-4.5" />
                 </div>
                 <div>
-                  <h4 className="text-xs font-bold">Листание тапом по краям</h4>
+                  <h4 className="text-xs font-bold">{tr("Листание тапом по краям")}</h4>
                   <p className="text-[10px] opacity-65">
                     {settings.tapToTurnPages !== false
-                      ? 'Включено: нажатие на края экрана листает страницу'
-                      : 'Отключено: страницы листаются только свайпом'}
+                      ? tr("Включено: нажатие на края экрана листает страницу")
+                      : tr("Отключено: страницы листаются только свайпом")}
                   </p>
                 </div>
               </div>
@@ -243,7 +244,7 @@ export const SettingsSheet: React.FC<SettingsSheetProps> = ({
                 className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors cursor-pointer ${
                   settings.tapToTurnPages !== false ? 'bg-amber-500' : 'bg-neutral-600/40'
                 }`}
-                title="Переключить листание тапом"
+                title={tr("Переключить листание тапом")}
               >
                 <span
                   className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-xs transition-transform ${

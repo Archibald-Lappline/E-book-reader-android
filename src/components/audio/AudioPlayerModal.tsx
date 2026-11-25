@@ -20,6 +20,7 @@ import { useAudioPlayer } from '../../context/AudioPlayerContext';
 import { ReaderThemeConfig, AudiobookTrack } from '../../types';
 import { formatAudioTime } from '../../services/audioStorage';
 import { Rewind15Icon, Forward15Icon } from './AudioIcons';
+import { tr } from '../../i18n';
 
 interface AudioPlayerModalProps {
   theme: ReaderThemeConfig;
@@ -61,13 +62,13 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
 
   const speedOptions = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0];
   const sleepTimerOptions: Array<{ label: string; value: number | 'end_of_track' }> = [
-    { label: '5 минут', value: 5 },
-    { label: '10 минут', value: 10 },
-    { label: '15 минут', value: 15 },
-    { label: '30 минут', value: 30 },
-    { label: '45 минут', value: 45 },
-    { label: '60 минут', value: 60 },
-    { label: 'В конце трека / главы', value: 'end_of_track' },
+    { label: tr("5 минут"), value: 5 },
+    { label: tr("10 минут"), value: 10 },
+    { label: tr("15 минут"), value: 15 },
+    { label: tr("30 минут"), value: 30 },
+    { label: tr("45 минут"), value: 45 },
+    { label: tr("60 минут"), value: 60 },
+    { label: tr("В конце трека / главы"), value: 'end_of_track' },
   ];
 
   const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,17 +108,17 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
             className={`w-9 h-9 rounded-full flex items-center justify-center active:scale-95 transition-all cursor-pointer ${
               theme.isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-black/10 text-stone-900'
             }`}
-            title="Свернуть плеер"
+            title={tr("Свернуть плеер")}
           >
             <ChevronDown className="w-6 h-6" />
           </button>
 
           <div className="text-center min-w-0 max-w-[200px]">
             <p className="text-[10px] font-bold tracking-wider uppercase opacity-60">
-              {currentCollection?.title ? 'Сборник' : 'Аудиокнига'}
+              {currentCollection?.title ? tr("Сборник") : tr("Аудиокнига")}
             </p>
             <h3 className="text-xs font-bold truncate">
-              {currentCollection?.title || 'Читалка Книг'}
+              {currentCollection?.title || 'BookSlut'}
             </h3>
           </div>
 
@@ -131,7 +132,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
                   ? 'text-neutral-400 hover:text-rose-400 hover:bg-white/10'
                   : 'text-stone-600 hover:text-rose-600 hover:bg-black/10'
               }`}
-              title="Остановить и закрыть плеер"
+              title={tr("Остановить и закрыть плеер")}
             >
               <X className="w-5 h-5" />
             </button>
@@ -158,7 +159,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
                     : 'bg-gradient-to-tr from-amber-200/80 to-amber-100/60 text-stone-800'
                 }`}>
                   <Headphones className="w-20 h-20 text-amber-600 dark:text-amber-500/80 mb-2" />
-                  <span className="text-xs font-semibold opacity-75">Аудиокнига</span>
+                  <span className="text-xs font-semibold opacity-75">{tr("Аудиокнига")}</span>
                 </div>
               )}
             </div>
@@ -170,7 +171,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
               {currentTrack.title}
             </h2>
             <p className={`text-xs truncate mt-1 ${theme.isDark ? 'text-neutral-400' : 'text-stone-600'}`}>
-              {currentTrack.author || currentCollection?.author || 'Автор не указан'}
+              {currentTrack.author || currentCollection?.author || tr("Автор не указан")}
             </p>
 
             <div className="inline-flex items-center gap-2 mt-2.5 px-3 py-1 rounded-full border text-xs font-bold"
@@ -180,9 +181,9 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
                 color: theme.isDark ? '#fbbf24' : '#92400e',
               }}
             >
-              <span>{progressPercent}% прослушано</span>
+              <span>{tr`${progressPercent}% прослушано`}</span>
               <span>•</span>
-              <span className="font-normal opacity-85">Осталось {formatAudioTime(remainingSeconds)}</span>
+              <span className="font-normal opacity-85">{tr("Осталось")} {formatAudioTime(remainingSeconds)}</span>
             </div>
           </div>
 
@@ -218,7 +219,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
               className={`w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition-all cursor-pointer ${
                 theme.isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-black/10 text-stone-900'
               }`}
-              title="Предыдущая глава"
+              title={tr("Предыдущая глава")}
             >
               <SkipBack className="w-5 h-5 fill-current" />
             </button>
@@ -232,7 +233,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
                   ? 'bg-white/10 hover:bg-white/15 text-white border-white/10'
                   : 'bg-black/5 hover:bg-black/10 text-stone-900 border-black/10'
               }`}
-              title="Назад на 15 секунд"
+              title={tr("Назад на 15 секунд")}
             >
               <Rewind15Icon className="w-6 h-6" />
             </button>
@@ -246,7 +247,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
                 backgroundColor: theme.accent,
                 color: '#fff',
               }}
-              title={isPlaying ? 'Пауза' : 'Слушать'}
+              title={isPlaying ? tr("Пауза") : tr("Слушать")}
             >
               {isPlaying ? (
                 <Pause className="w-8 h-8 fill-current" />
@@ -264,7 +265,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
                   ? 'bg-white/10 hover:bg-white/15 text-white border-white/10'
                   : 'bg-black/5 hover:bg-black/10 text-stone-900 border-black/10'
               }`}
-              title="Вперёд на 15 секунд"
+              title={tr("Вперёд на 15 секунд")}
             >
               <Forward15Icon className="w-6 h-6" />
             </button>
@@ -276,7 +277,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
               className={`w-10 h-10 rounded-full flex items-center justify-center active:scale-90 transition-all cursor-pointer ${
                 theme.isDark ? 'hover:bg-white/10 text-white' : 'hover:bg-black/10 text-stone-900'
               }`}
-              title="Следующая глава"
+              title={tr("Следующая глава")}
             >
               <SkipForward className="w-5 h-5 fill-current" />
             </button>
@@ -314,9 +315,9 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
               <span>
                 {sleepTimer.active
                   ? sleepTimer.mode === 'end_of_track'
-                    ? 'Конец'
+                    ? tr("Конец")
                     : formatAudioTime(sleepTimer.remainingSeconds)
-                  : 'Таймер'}
+                  : tr("Таймер")}
               </span>
             </button>
 
@@ -329,7 +330,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
               }`}
             >
               <ListMusic className="w-4 h-4 text-amber-500" />
-              <span>Тома ({playlist.length})</span>
+              <span>{tr`Тома (${playlist.length})`}</span>
             </button>
           </div>
         </div>
@@ -355,7 +356,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
               >
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-sm font-bold flex items-center gap-2">
-                    <Gauge className="w-4 h-4 text-amber-500" /> Скорость воспроизведения
+                    <Gauge className="w-4 h-4 text-amber-500" /> {tr("Скорость воспроизведения")}
                   </h4>
                   <button
                     onClick={() => setShowSpeedSheet(false)}
@@ -411,7 +412,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
               >
                 <div className="flex items-center justify-between mb-4">
                   <h4 className="text-sm font-bold flex items-center gap-2">
-                    <Moon className="w-4 h-4 text-amber-500" /> Таймер остановки (сна)
+                    <Moon className="w-4 h-4 text-amber-500" /> {tr("Таймер остановки (сна)")}
                   </h4>
                   <button
                     onClick={() => setShowSleepSheet(false)}
@@ -424,11 +425,11 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
                 {sleepTimer.active && (
                   <div className="mb-4 p-3.5 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-between">
                     <div>
-                      <p className="text-xs font-bold text-amber-500">Таймер активен</p>
+                      <p className="text-xs font-bold text-amber-500">{tr("Таймер активен")}</p>
                       <p className="text-[11px] opacity-75">
                         {sleepTimer.mode === 'end_of_track'
-                          ? 'Остановится в конце текущего трека'
-                          : `Осталось: ${formatAudioTime(sleepTimer.remainingSeconds)}`}
+                          ? tr("Остановится в конце текущего трека")
+                          : tr`Осталось: ${formatAudioTime(sleepTimer.remainingSeconds)}`}
                       </p>
                     </div>
                     <button
@@ -442,7 +443,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
                           : 'bg-stone-200 text-stone-900 hover:bg-stone-300'
                       }`}
                     >
-                      Отключить
+                      {tr("Отключить")}
                     </button>
                   </div>
                 )}
@@ -492,7 +493,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
               >
                 <div className="flex items-center justify-between mb-3 shrink-0">
                   <h4 className="text-sm font-bold flex items-center gap-2">
-                    <ListMusic className="w-4 h-4 text-amber-500" /> Тома и главы ({playlist.length})
+                    <ListMusic className="w-4 h-4 text-amber-500" /> {tr`Тома и главы (${playlist.length})`}
                   </h4>
                   <button
                     onClick={() => setShowPlaylistSheet(false)}
@@ -531,7 +532,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({ theme }) => 
                             <div className="flex items-center gap-2 text-[10px] opacity-70 mt-0.5">
                               <span>{formatAudioTime(track.duration)}</span>
                               <span>•</span>
-                              <span>{track.progressPercent}% прослушано</span>
+                              <span>{tr`${track.progressPercent}% прослушано`}</span>
                             </div>
                           </div>
                         </div>

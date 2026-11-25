@@ -41,6 +41,7 @@ import {AppAppearanceModal} from './AppAppearanceModal';
 import {LibraryActionsModal} from './LibraryActionsModal';
 import {pushBackHandler} from '../utils/androidBackNavigation';
 import {useAudioPlayer} from '../context/AudioPlayerContext';
+import { tr } from '../i18n';
 
 interface LibraryViewProps {
     books: Book[];
@@ -106,6 +107,15 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
     const openLibraryActions = () => setShowLibraryActionsModal(true);
     const closeLibraryActions = () => setShowLibraryActionsModal(false);
+
+    // «+» в центре нижней панели (App.tsx) просит открыть выбор файлов
+    useEffect(() => {
+        const onAddBook = () => {
+            if (!isSelectionMode) fileInputRef.current?.click();
+        };
+        window.addEventListener('library:add-book', onAddBook);
+        return () => window.removeEventListener('library:add-book', onAddBook);
+    });
 
     const isAtRoot = selectedBookForDetails === null && !isSelectionMode && !showAppearanceModal && !showLibraryActionsModal && !duplicateModal;
 
@@ -232,9 +242,9 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     const handleBatchDeleteBooks = async () => {
         const ids = Array.from<string>(selectedBookIds);
         if (ids.length === 0) return;
-        if (window.confirm(`Удалить выбранные книги (${ids.length} шт.) из библиотеки?`)) {
+        if (window.confirm(tr`Удалить выбранные книги (${ids.length} шт.) из библиотеки?`)) {
             await deleteMultipleBooksFromDB(ids);
-            showToast(`Удалено книг: ${ids.length}`);
+            showToast(tr`Удалено книг: ${ids.length}`);
             clearSelection();
             onRefreshBooks();
         }
@@ -244,7 +254,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         const ids = Array.from<string>(selectedBookIds);
         if (ids.length === 0) return;
         await resetMultipleBooksProgress(ids);
-        showToast(`Прогресс сброшен на 0% для ${ids.length} книг`);
+        showToast(tr`Прогресс сброшен на 0% для ${ids.length} книг`);
         clearSelection();
         onRefreshBooks();
     };
@@ -253,7 +263,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         const ids = Array.from<string>(selectedBookIds);
         if (ids.length === 0) return;
         await toggleFavoriteMultipleBooks(ids);
-        showToast(`Обновлено избранное для ${ids.length} книг`);
+        showToast(tr`Обновлено избранное для ${ids.length} книг`);
         onRefreshBooks();
     };
 
@@ -303,12 +313,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     const handleImportFiles = async (files: FileList | null) => {
         if (!files || files.length === 0) return;
         setIsImporting(true);
-        setImportStatus(`Импорт ${files.length} книг...`);
+        setImportStatus(tr`Импорт ${files.length} книг...`);
 
         try {
             for (let i = 0; i < files.length; i++) {
                 const file = files[i];
-                setImportStatus(`Обработка: ${file.name}`);
+                setImportStatus(tr`Обработка: ${file.name}`);
                 const parsed = await parseBookFile(file);
 
                 const existing = books.find(
@@ -341,7 +351,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                         }
                     } else if (action === 'duplicate') {
                         parsed.id = `book-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
-                        parsed.title = `${parsed.title} (копия)`;
+                        parsed.title = tr`${parsed.title} (копия)`;
                         await saveBook(parsed);
                         if (parsed.format === 'cbz') {
                             await saveComicArchive(parsed.id, file);
@@ -357,7 +367,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             onRefreshBooks();
         } catch (err: any) {
             console.error('Import error', err);
-            alert('Ошибка импорта: ' + (err.message || 'Не удалось прочитать файл'));
+            alert(tr("Ошибка импорта: ") + (err.message || tr("Не удалось прочитать файл")));
         } finally {
             setIsImporting(false);
             setImportStatus(null);
@@ -375,7 +385,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     };
 
     const handleDeleteBook = async (bookId: string) => {
-        if (window.confirm('Удалить эту книгу из библиотеки?')) {
+        if (window.confirm(tr("Удалить эту книгу из библиотеки?"))) {
             await deleteBookFromDB(bookId);
             setSelectedBookForDetails(null);
             onRefreshBooks();
@@ -442,7 +452,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                 backgroundColor: theme.accent,
                                 color: isDark ? '#000' : '#fff',
                             }}
-                            title="Настройки темы, анимации и листания страниц"
+                            title={tr("Настройки темы, анимации и листания страниц")}
                         >
                             <BookOpen className="w-5 h-5"/>
                         </button>
@@ -456,11 +466,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                 borderColor: theme.border,
                                 color: theme.text,
                             }}
-                            title="Управление библиотекой: сброс прогресса, экспорт файлов, удаление"
+                            title={tr("Управление библиотекой: сброс прогресса, экспорт файлов, удаление")}
                         >
                             <span className="font-bold">{books.length}</span>
                             <span className="opacity-70 font-normal">
-                {books.length === 1 ? 'книга' : books.length < 5 ? 'книги' : 'книг'}
+                {books.length === 1 ? tr("книга") : books.length < 5 ? tr("книги") : tr("книг")}
               </span>
                         </button>
                     </div>
@@ -470,17 +480,17 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                             id="btn-open-source-code"
                             onClick={onOpenSourceCode}
                             className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-500 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition-colors shadow-xs active:scale-95 cursor-pointer"
-                            title="Исходный код на GitHub"
+                            title={tr("Исходный код на GitHub")}
                         >
                             <Github className="w-4 h-4 shrink-0"/>
-                            <span className="hidden sm:inline">Исходный код</span>
+                            <span className="hidden sm:inline">{tr("Исходный код")}</span>
                         </button>
 
                         <button
                             id="btn-open-sync"
                             onClick={onOpenSync}
                             className="p-1.5 sm:p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 text-amber-500 transition-colors active:scale-95 cursor-pointer"
-                            title="Синхронизация прогресса"
+                            title={tr("Синхронизация прогресса")}
                         >
                             <RefreshCw className="w-4 h-4"/>
                         </button>
@@ -489,7 +499,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                             id="btn-toggle-view-mode"
                             onClick={() => handleSetViewMode(viewMode === 'grid' ? 'list' : 'grid')}
                             className="p-1.5 sm:p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 opacity-70 hover:opacity-100 transition-colors active:scale-95 cursor-pointer"
-                            title={viewMode === 'grid' ? 'Список' : 'Сетка'}
+                            title={viewMode === 'grid' ? tr("Список") : tr("Сетка")}
                         >
                             {viewMode === 'grid' ? <ListIcon className="w-4 h-4"/> : <LayoutGrid className="w-4 h-4"/>}
                         </button>
@@ -509,7 +519,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                             <input
                                 id="input-library-search"
                                 type="text"
-                                placeholder="Поиск по названию, автору или жанру..."
+                                placeholder={tr("Поиск по названию, автору или жанру...")}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full bg-transparent outline-none text-xs sm:text-sm placeholder:opacity-50"
@@ -536,10 +546,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                     color: theme.text,
                                 }}
                             >
-                                <option value="recent">Недавние</option>
-                                <option value="progress">По прогрессу</option>
-                                <option value="title">По названию</option>
-                                <option value="author">По автору</option>
+                                <option value="recent">{tr("Недавние")}</option>
+                                <option value="progress">{tr("По прогрессу")}</option>
+                                <option value="title">{tr("По названию")}</option>
+                                <option value="author">{tr("По автору")}</option>
                             </select>
                             <ArrowUpDown
                                 className="w-3 h-3 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none opacity-50"/>
@@ -548,10 +558,10 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
                     <div className="flex items-center gap-1.5 overflow-x-auto pb-0.5 no-scrollbar text-xs">
                         {[
-                            {id: 'all', label: 'Все книги'},
-                            {id: 'reading', label: 'Читаю'},
-                            {id: 'completed', label: 'Прочитанные'},
-                            {id: 'favorites', label: 'Избранные'},
+                            {id: 'all', label: tr("Все книги")},
+                            {id: 'reading', label: tr("Читаю")},
+                            {id: 'completed', label: tr("Прочитанные")},
+                            {id: 'favorites', label: tr("Избранные")},
                         ].map((tab) => {
                             const isActive = activeFilter === tab.id;
                             return (
@@ -596,14 +606,14 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 id="library-scroll-container"
                 className="flex-1 overflow-y-auto p-3.5 sm:p-6"
                 style={{
-                    paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 32px)',
+                    paddingBottom: 'calc(96px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)))',
                 }}
             >
                 {isDragging && (
                     <div
                         className="absolute inset-4 rounded-3xl border-2 border-dashed border-amber-500 bg-amber-500/10 backdrop-blur-xs flex flex-col items-center justify-center z-40 pointer-events-none">
                         <Upload className="w-12 h-12 text-amber-500 animate-bounce mb-2"/>
-                        <p className="text-base font-bold text-amber-500">Отпустите файлы для добавления</p>
+                        <p className="text-base font-bold text-amber-500">{tr("Отпустите файлы для добавления")}</p>
                         <p className="text-xs opacity-75">EPUB, FB2, PDF, TXT, MD, CBZ</p>
                     </div>
                 )}
@@ -613,7 +623,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                         className="mb-4 p-3 rounded-2xl bg-amber-500/15 border border-amber-500/30 text-amber-500 text-xs font-semibold flex items-center gap-2.5 animate-pulse">
                         <div
                             className="w-3.5 h-3.5 border-2 border-amber-500 border-t-transparent rounded-full animate-spin shrink-0"/>
-                        <span>{importStatus || 'Импорт книг...'}</span>
+                        <span>{importStatus || tr("Импорт книг...")}</span>
                     </div>
                 )}
 
@@ -629,12 +639,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                             <FolderDown className="w-8 h-8 opacity-40 text-amber-500"/>
                         </div>
                         <h3 className="font-bold text-base mb-1">
-                            {searchQuery || activeFilter !== 'all' ? 'Ничего не найдено' : 'Библиотека пуста'}
+                            {searchQuery || activeFilter !== 'all' ? tr("Ничего не найдено") : tr("Библиотека пуста")}
                         </h3>
                         <p className="text-xs opacity-60 max-w-xs mb-4">
                             {searchQuery || activeFilter !== 'all'
-                                ? 'Попробуйте сбросить фильтры поиска'
-                                : 'Нажмите «Добавить книгу» или перетащите файлы книг на экран'}
+                                ? tr("Попробуйте сбросить фильтры поиска")
+                                : tr("Нажмите «Добавить книгу» или перетащите файлы книг на экран")}
                         </p>
                         {(searchQuery || activeFilter !== 'all' || selectedFormat) && (
                             <button
@@ -645,7 +655,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                 }}
                                 className="px-4 py-2 rounded-xl text-xs font-bold bg-amber-500 text-neutral-950 shadow-xs cursor-pointer"
                             >
-                                Сбросить фильтры
+                                {tr("Сбросить фильтры")}
                             </button>
                         )}
                     </div>
@@ -728,7 +738,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                                 <button
                                                     onClick={(e) => handleToggleFavorite(e, book)}
                                                     className="absolute top-1.5 right-1.5 p-1.5 rounded-full bg-black/55 backdrop-blur-xs text-white shadow-xs hover:scale-110 active:scale-95 transition-transform cursor-pointer z-10"
-                                                    title={book.isFavorite ? 'В избранном' : 'Добавить в избранное'}
+                                                    title={book.isFavorite ? tr("В избранном") : tr("Добавить в избранное")}
                                                 >
                                                     <Star
                                                         className={`w-3.5 h-3.5 ${book.isFavorite ? 'fill-amber-400 text-amber-400' : 'text-white/80 hover:text-white'}`}
@@ -739,7 +749,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                                     <span
                                                         className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-wider bg-emerald-500 text-neutral-950 shadow-md z-10 flex items-center gap-0.5">
                             <Check className="w-2.5 h-2.5 stroke-[2.5]"/>
-                            Прочитано
+                            {tr("Прочитано")}
                           </span>
                                                 )}
 
@@ -767,11 +777,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                                         <span
                                                             className="font-semibold text-emerald-500 flex items-center gap-1">
                               <Check className="w-3 h-3 stroke-[2.5]"/>
-                              Прочитано
+                              {tr("Прочитано")}
                             </span>
                                                     ) : (
                                                         <span
-                                                            className="font-mono">{Math.round(book.progressPercent || 0)}% прочитано</span>
+                                                            className="font-mono">{tr`${Math.round(book.progressPercent || 0)}% прочитано`}</span>
                                                     )}
                                                     <button
                                                         onClick={(e) => {
@@ -779,7 +789,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                                             openDetails(book);
                                                         }}
                                                         className="p-1 -mr-1 rounded-md hover:bg-black/10 dark:hover:bg-white/10 opacity-70 hover:opacity-100 cursor-pointer"
-                                                        title="Действия с книгой"
+                                                        title={tr("Действия с книгой")}
                                                     >
                                                         <MoreVertical className="w-3.5 h-3.5"/>
                                                     </button>
@@ -885,11 +895,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                                         <span
                                                             className="text-[10px] font-semibold text-emerald-500 flex items-center gap-1">
                               <Check className="w-3 h-3 stroke-[2.5]"/>
-                              Прочитано
+                              {tr("Прочитано")}
                             </span>
                                                     ) : (
                                                         <span className="text-[10px] font-mono opacity-70">
-                              {Math.round(book.progressPercent || 0)}% прочитано
+                              {tr`${Math.round(book.progressPercent || 0)}% прочитано`}
                             </span>
                                                     )}
                                                 </div>
@@ -899,7 +909,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                                 <button
                                                     onClick={(e) => handleToggleFavorite(e, book)}
                                                     className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                                                    title={book.isFavorite ? 'В избранном' : 'Добавить в избранное'}
+                                                    title={book.isFavorite ? tr("В избранном") : tr("Добавить в избранное")}
                                                 >
                                                     <Star
                                                         className={`w-4 h-4 ${book.isFavorite ? 'fill-amber-400 text-amber-400' : 'opacity-40'}`}
@@ -911,7 +921,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                                         openDetails(book);
                                                     }}
                                                     className="p-2 rounded-xl hover:bg-black/10 dark:hover:bg-white/10 opacity-60 transition-colors cursor-pointer"
-                                                    title="Действия с книгой"
+                                                    title={tr("Действия с книгой")}
                                                 >
                                                     <MoreVertical className="w-4 h-4"/>
                                                 </button>
@@ -925,34 +935,14 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 )}
             </div>
 
-            {!isSelectionMode && (
-                <div
-                    className="absolute right-5 sm:right-6 z-30 transition-all duration-200"
-                    style={{
-                        bottom: currentTrack ? '142px' : '82px',
-                    }}
-                >
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        multiple
-                        accept=".epub,.fb2,.txt,.md,.cbz,.pdf,.zip"
-                        onChange={(e) => handleImportFiles(e.target.files)}
-                        className="hidden"
-                    />
-                    <motion.button
-                        whileHover={{scale: 1.05}}
-                        whileTap={{scale: 0.95}}
-                        id="btn-fab-add-book"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="h-14 px-5 rounded-2xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold shadow-xl shadow-amber-500/30 flex items-center gap-2.5 transition-all group cursor-pointer"
-                        title="Добавить книги (EPUB, FB2, TXT, MD, CBZ)"
-                    >
-                        <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform duration-200"/>
-                        <span className="text-sm font-bold tracking-tight">Добавить книгу</span>
-                    </motion.button>
-                </div>
-            )}
+            <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept=".epub,.fb2,.txt,.md,.cbz,.pdf,.zip"
+                onChange={(e) => handleImportFiles(e.target.files)}
+                className="hidden"
+            />
 
             <OverlayPortal>
                 <AnimatePresence>
@@ -974,7 +964,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                     backgroundColor: theme.cardBg,
                                     borderColor: theme.border,
                                     color: theme.text,
-                                    paddingBottom: 'max(env(safe-area-inset-bottom, 0px), 24px)',
+                                    paddingBottom: 'calc(24px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)))',
                                 }}
                                 onClick={(e) => e.stopPropagation()}
                             >
@@ -1009,8 +999,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                         </div>
 
                                         <p className="text-[11px] font-mono text-amber-500 font-semibold mt-2">
-                                            Прогресс: {Math.round(selectedBookForDetails.progressPercent || 0)}%
-                                            · {selectedBookForDetails.chapters.length} глав
+                                            {tr("Прогресс:")} {Math.round(selectedBookForDetails.progressPercent || 0)}%
+                                            · {tr`${selectedBookForDetails.chapters.length} глав`}
                                         </p>
                                     </div>
                                 </div>
@@ -1031,25 +1021,25 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                         }}
                                         className="flex-1 py-3 rounded-2xl bg-amber-500 hover:bg-amber-400 text-neutral-950 font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-colors cursor-pointer"
                                     >
-                                        <BookOpen className="w-4 h-4"/> Читать
+                                        <BookOpen className="w-4 h-4"/> {tr("Читать")}
                                     </button>
 
                                     <button
                                         id="btn-sheet-reset-progress"
                                         onClick={() => handleResetSingleBookProgress(selectedBookForDetails.id)}
                                         className="p-3 rounded-2xl border border-amber-500/35 text-amber-500 hover:bg-amber-500/15 transition-colors cursor-pointer flex items-center gap-1.5"
-                                        title="Сбросить прогресс чтения (0%)"
+                                        title={tr("Сбросить прогресс чтения (0%)")}
                                     >
                                         <RotateCcw className="w-4.5 h-4.5"/>
                                         <span
-                                            className="text-xs font-semibold hidden min-[360px]:inline">Сбросить</span>
+                                            className="text-xs font-semibold hidden min-[360px]:inline">{tr("Сбросить")}</span>
                                     </button>
 
                                     <button
                                         id="btn-sheet-delete"
                                         onClick={() => handleDeleteBook(selectedBookForDetails.id)}
                                         className="p-3 rounded-2xl border border-rose-500/30 text-rose-500 hover:bg-rose-500/15 transition-colors cursor-pointer"
-                                        title="Удалить из библиотеки"
+                                        title={tr("Удалить из библиотеки")}
                                     >
                                         <Trash2 className="w-4.5 h-4.5"/>
                                     </button>
@@ -1085,8 +1075,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                         <AlertCircle className="w-6 h-6"/>
                                     </div>
                                     <div>
-                                        <h3 className="font-bold text-sm">Файл уже существует</h3>
-                                        <p className="text-xs opacity-60">Обнаружена похожая или идентичная книга</p>
+                                        <h3 className="font-bold text-sm">{tr("Файл уже существует")}</h3>
+                                        <p className="text-xs opacity-60">{tr("Обнаружена похожая или идентичная книга")}</p>
                                     </div>
                                 </div>
 
@@ -1097,7 +1087,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                         {duplicateModal.newBook.author} · {duplicateModal.newBook.fileSize}
                                     </div>
                                     <div className="text-[11px] text-amber-500 font-medium">
-                                        В библиотеке: прогресс {Math.round(duplicateModal.existingBook.progressPercent)}%
+                                        {tr("В библиотеке: прогресс")} {Math.round(duplicateModal.existingBook.progressPercent)}%
                                     </div>
                                 </div>
 
@@ -1107,21 +1097,21 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                         onClick={() => duplicateModal.onResolve('replace')}
                                         className="w-full py-2.5 rounded-xl bg-amber-500 text-neutral-950 font-bold text-xs hover:bg-amber-400 transition-colors cursor-pointer"
                                     >
-                                        Заменить существующую книгу
+                                        {tr("Заменить существующую книгу")}
                                     </button>
                                     <button
                                         id="btn-duplicate-add-copy"
                                         onClick={() => duplicateModal.onResolve('duplicate')}
                                         className="w-full py-2.5 rounded-xl border border-inherit/20 text-xs font-semibold hover:bg-white/5 transition-colors cursor-pointer"
                                     >
-                                        Добавить как отдельную копию
+                                        {tr("Добавить как отдельную копию")}
                                     </button>
                                     <button
                                         id="btn-duplicate-skip"
                                         onClick={() => duplicateModal.onResolve('skip')}
                                         className="w-full py-2 rounded-xl text-xs opacity-60 hover:opacity-100 transition-opacity cursor-pointer"
                                     >
-                                        Пропустить (не добавлять)
+                                        {tr("Пропустить (не добавлять)")}
                                     </button>
                                 </div>
                             </motion.div>
@@ -1170,7 +1160,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                     exit={{y: 60, opacity: 0}}
                                     id="books-batch-action-bar"
                                     className="fixed left-3 right-3 sm:left-auto sm:right-6 sm:w-auto max-w-xl mx-auto z-40 p-2 sm:p-2.5 rounded-3xl bg-neutral-950/95 text-white border border-neutral-800 shadow-2xl backdrop-blur-md flex items-center justify-between sm:justify-start gap-1.5 sm:gap-2 select-none"
-                                    style={{bottom: '24px'}}
+                                    style={{bottom: 'calc(24px + max(env(safe-area-inset-bottom, 0px), var(--safe-area-inset-bottom, 0px)))'}}
                                 >
                                     <div className="flex items-center gap-1.5 pl-1.5 sm:pl-2 shrink-0">
                     <span className="text-[11px] font-bold bg-amber-500 text-neutral-950 px-2 py-0.5 rounded-full">
@@ -1179,9 +1169,9 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                         <button
                                             onClick={() => toggleSelectAll(sortedBooks)}
                                             className="text-[11px] font-semibold opacity-80 hover:opacity-100 underline decoration-dotted cursor-pointer px-1"
-                                            title={isAllSelected ? 'Снять выделение со всех' : 'Выделить все книги'}
+                                            title={isAllSelected ? tr("Снять выделение со всех") : tr("Выделить все книги")}
                                         >
-                                            {isAllSelected ? 'Снять' : 'Все'}
+                                            {isAllSelected ? tr("Снять") : tr("Все")}
                                         </button>
                                     </div>
 
@@ -1192,36 +1182,36 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                                             id="btn-batch-favorite"
                                             onClick={handleBatchToggleFavorites}
                                             className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-amber-300"
-                                            title="Добавить или убрать из избранного"
+                                            title={tr("Добавить или убрать из избранного")}
                                         >
                                             <Star className="w-3.5 h-3.5 fill-current"/>
-                                            <span className="hidden sm:inline">Избранное</span>
+                                            <span className="hidden sm:inline">{tr("Избранное")}</span>
                                         </button>
 
                                         <button
                                             id="btn-batch-reset-book-progress"
                                             onClick={handleBatchResetProgress}
                                             className="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 active:scale-95 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer text-sky-400"
-                                            title="Сбросить прогресс чтения выбранных книг на 0%"
+                                            title={tr("Сбросить прогресс чтения выбранных книг на 0%")}
                                         >
                                             <RotateCcw className="w-3.5 h-3.5"/>
-                                            <span className="hidden sm:inline">Сброс</span>
+                                            <span className="hidden sm:inline">{tr("Сброс")}</span>
                                         </button>
 
                                         <button
                                             id="btn-batch-delete-books"
                                             onClick={handleBatchDeleteBooks}
                                             className="px-2.5 py-1.5 rounded-xl bg-rose-500/25 hover:bg-rose-500/40 text-rose-300 active:scale-95 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer"
-                                            title="Удалить выбранные книги из библиотеки"
+                                            title={tr("Удалить выбранные книги из библиотеки")}
                                         >
                                             <Trash2 className="w-3.5 h-3.5"/>
-                                            <span className="hidden sm:inline">Удалить</span>
+                                            <span className="hidden sm:inline">{tr("Удалить")}</span>
                                         </button>
 
                                         <button
                                             onClick={clearSelection}
                                             className="p-1.5 rounded-xl hover:bg-white/10 opacity-70 hover:opacity-100 transition-colors cursor-pointer ml-0.5"
-                                            title="Закрыть выбор"
+                                            title={tr("Закрыть выбор")}
                                         >
                                             <X className="w-4 h-4"/>
                                         </button>

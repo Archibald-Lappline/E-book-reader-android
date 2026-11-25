@@ -2,7 +2,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'com.ereader.material',
-  appName: 'Читалка Книг',
+  appName: 'BookSlut',
   webDir: 'dist',
   server: {
     androidScheme: 'https'
