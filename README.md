@@ -1,3 +1,5 @@
+<img width="1280" height="889" alt="логотип BOOk" src="https://github.com/user-attachments/assets/6d25f11f-bf1b-404d-9d9e-dfdadf346cbe" />
+
 # 📚 Material E-Reader & Audiobooks (Android & Web)
 
 **Русский** | [English](./README.en.md)
@@ -10,6 +12,8 @@
 [![PWA Ready](https://img.shields.io/badge/PWA-Offline_First-success.svg)](https://web.dev/progressive-web-apps/)
 
 **Material E-Reader & Audiobooks** — современное, быстрое и полностью открытое (Open Source) приложение для чтения электронных книг и прослушивания аудиокниг, созданное в канонах **Google Material Design 3** специально для мобильных устройств Android и современных веб-браузеров.
+
+<img width="610" height="1280" alt="-2147483648_-219821" src="https://github.com/user-attachments/assets/bf059933-fde5-4daf-b4e0-0c0960c30727" />
 
 Поддерживает чтение и прослушивание офлайн, реалистичный 3D-эффект перелистывания бумажных страниц, загрузку аудиофайлов, создание пользовательских сборников и томов, эргономичный аудиоплеер с таймером сна, цитаты и заметки, а также автоматическую сборку APK с единым постоянным ключом подписи для бесшовных обновлений.
 
