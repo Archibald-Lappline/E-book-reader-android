@@ -23,7 +23,11 @@ import android.os.Bundle;
 import android.os.PowerManager;
 import android.util.Base64;
 import android.view.KeyEvent;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.provider.Settings;
 import android.webkit.JavascriptInterface;
+import android.webkit.WebView;
 import android.webkit.ValueCallback;
 import androidx.activity.OnBackPressedCallback;
 import androidx.core.app.ActivityCompat;
@@ -66,6 +70,151 @@ public class MainActivity extends BridgeActivity {
     private final android.os.Handler pauseHandler = new android.os.Handler(android.os.Looper.getMainLooper());
     private Runnable pauseReleaseRunnable = null;
     private long lastPlaybackStateUpdateTime = 0;
+
+
+    private BroadcastReceiver screenStateReceiver;
+    private boolean isActivityStopped = false;
+    private static final long KEEP_ALIVE_INTERVAL_MS = 5000;
+    private final Runnable keepAliveRunnable = new Runnable() {
+        @Override
+        public void run() {
+            if (isCurrentlyPlaying) {
+                keepWebViewAwake();
+                pauseHandler.postDelayed(this, KEEP_ALIVE_INTERVAL_MS);
+            }
+        }
+    };
+
+    private void keepWebViewAwake() {
+        if (getBridge() != null && getBridge().getWebView() != null) {
+            getBridge().getWebView().onResume();
+            getBridge().getWebView().resumeTimers();
+        }
+    }
+
+    private void startKeepAlive() {
+        pauseHandler.removeCallbacks(keepAliveRunnable);
+        pauseHandler.postDelayed(keepAliveRunnable, KEEP_ALIVE_INTERVAL_MS);
+    }
+
+    private void stopKeepAlive() {
+        pauseHandler.removeCallbacks(keepAliveRunnable);
+    }
+
+    private void registerScreenStateReceiver() {
+        screenStateReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                if (!isCurrentlyPlaying) return;
+
+                keepWebViewAwake();
+                pauseHandler.postDelayed(MainActivity.this::keepWebViewAwake, 300);
+                pauseHandler.postDelayed(MainActivity.this::keepWebViewAwake, 1500);
+                acquireWakeLock();
+            }
+        };
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_SCREEN_OFF);
+        filter.addAction(Intent.ACTION_SCREEN_ON);
+        filter.addAction(Intent.ACTION_USER_PRESENT);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(screenStateReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        } else {
+            registerReceiver(screenStateReceiver, filter);
+        }
+    }
+
+    private void maybeRequestBatteryOptimizationExemption() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return;
+        try {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            if (pm == null || pm.isIgnoringBatteryOptimizations(getPackageName())) return;
+            SharedPreferences prefs = getSharedPreferences("audio_prefs", MODE_PRIVATE);
+            if (prefs.getBoolean("battery_opt_asked", false)) return;
+            prefs.edit().putBoolean("battery_opt_asked", true).apply();
+            Intent intent = new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        } catch (Exception ignored) {}
+    }
+
+    private AudioManager audioManager;
+    private AudioFocusRequest audioFocusRequest;
+    private boolean hasAudioFocus = false;
+    private boolean resumeOnFocusGain = false;
+    private boolean isDucked = false;
+    private final AudioManager.OnAudioFocusChangeListener audioFocusListener = focusChange -> {
+        switch (focusChange) {
+            case AudioManager.AUDIOFOCUS_GAIN:
+                hasAudioFocus = true;
+                if (resumeOnFocusGain) {
+                    resumeOnFocusGain = false;
+                    isDucked = false;
+                    sendActionToWeb("focusResume", null);
+                } else if (isDucked) {
+                    isDucked = false;
+                    sendActionToWeb("unduck", null);
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK:
+                if (isCurrentlyPlaying) {
+                    isDucked = true;
+                    sendActionToWeb("duck", null);
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS_TRANSIENT:
+                if (isCurrentlyPlaying) {
+                    resumeOnFocusGain = true;
+                    sendActionToWeb("focusPause", null);
+                }
+                break;
+            case AudioManager.AUDIOFOCUS_LOSS:
+                hasAudioFocus = false;
+                resumeOnFocusGain = false;
+                isDucked = false;
+                sendActionToWeb("focusPause", null);
+                abandonAudioFocus();
+                break;
+        }
+    };
+
+    private void requestAudioFocus() {
+        if (hasAudioFocus) return;
+        if (audioManager == null) {
+            audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        }
+        if (audioManager == null) return;
+        int result;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (audioFocusRequest == null) {
+                AudioAttributes attrs = new AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_MEDIA)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                        .build();
+                audioFocusRequest = new AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN)
+                        .setAudioAttributes(attrs)
+                        // true = система не приглушает звук сама, а передаёт событие нам
+                        .setWillPauseWhenDucked(true)
+                        .setAcceptsDelayedFocusGain(false)
+                        .setOnAudioFocusChangeListener(audioFocusListener, pauseHandler)
+                        .build();
+            }
+            result = audioManager.requestAudioFocus(audioFocusRequest);
+        } else {
+            result = audioManager.requestAudioFocus(audioFocusListener, AudioManager.STREAM_MUSIC, AudioManager.AUDIOFOCUS_GAIN);
+        }
+        hasAudioFocus = result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED;
+    }
+
+    private void abandonAudioFocus() {
+        if (audioManager == null) return;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (audioFocusRequest != null) audioManager.abandonAudioFocusRequest(audioFocusRequest);
+        } else {
+            audioManager.abandonAudioFocus(audioFocusListener);
+        }
+        hasAudioFocus = false;
+    }
 
     private void startForegroundServiceCompat(Notification notification) {
         try {
@@ -128,10 +277,17 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onStop() {
         super.onStop();
+        isActivityStopped = true;
         if ((isCurrentlyPlaying || hasActiveTrack) && getBridge() != null && getBridge().getWebView() != null) {
             getBridge().getWebView().onResume();
             getBridge().getWebView().resumeTimers();
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        isActivityStopped = false;
     }
 
     @Override
@@ -147,8 +303,15 @@ public class MainActivity extends BridgeActivity {
         // Ensure no stale notification is shown on app launch
         hideNotification();
 
+        registerScreenStateReceiver();
+
         // Register Javascript Interface with Capacitor WebView and allow background audio
         if (getBridge() != null && getBridge().getWebView() != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                // Процесс отрисовки WebView (в нём играет звук) должен оставаться важным
+                // и когда WebView не виден — иначе система может его заморозить.
+                getBridge().getWebView().setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false);
+            }
             getBridge().getWebView().getSettings().setMediaPlaybackRequiresUserGesture(false);
             getBridge().getWebView().addJavascriptInterface(new MediaBridge(), "AndroidMediaBridge");
         }
@@ -339,7 +502,6 @@ public class MainActivity extends BridgeActivity {
     private void sendActionToWeb(final String action, final Object param) {
         runOnUiThread(() -> {
             if (getBridge() != null && getBridge().getWebView() != null) {
-                // Ensure WebView timers are active so JavaScript can respond immediately from background/lockscreen
                 getBridge().getWebView().onResume();
                 getBridge().getWebView().resumeTimers();
                 String js;
@@ -359,7 +521,6 @@ public class MainActivity extends BridgeActivity {
             return;
         }
 
-        // 1. Update PlaybackState for Android System Media Carousel
         long actions = PlaybackState.ACTION_PLAY
                 | PlaybackState.ACTION_PAUSE
                 | PlaybackState.ACTION_PLAY_PAUSE
@@ -377,7 +538,6 @@ public class MainActivity extends BridgeActivity {
 
         mediaSession.setPlaybackState(stateBuilder.build());
 
-        // 2. Update MediaMetadata
         MediaMetadata.Builder metaBuilder = new MediaMetadata.Builder()
                 .putString(MediaMetadata.METADATA_KEY_TITLE, currentTitle)
                 .putString(MediaMetadata.METADATA_KEY_ARTIST, currentArtist)
@@ -394,7 +554,6 @@ public class MainActivity extends BridgeActivity {
             mediaSession.setActive(true);
         }
 
-        // 3. Build Rich MediaStyle Notification for the notification shade
         Notification.Builder notifBuilder;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notifBuilder = new Notification.Builder(this, CHANNEL_ID);
@@ -512,6 +671,13 @@ public class MainActivity extends BridgeActivity {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        stopKeepAlive();
+        if (screenStateReceiver != null) {
+            try {
+                unregisterReceiver(screenStateReceiver);
+            } catch (Exception ignored) {}
+        }
+        abandonAudioFocus();
         hideNotification();
         releaseWakeLock();
         if (mediaSession != null) {
@@ -541,7 +707,6 @@ public class MainActivity extends BridgeActivity {
                 currentArtist = artist != null && !artist.isEmpty() ? artist : "BookSlut";
                 currentAlbum = album != null ? album : "";
 
-                // Fetch or decode cover bitmap in background
                 if (coverUrl != null && !coverUrl.isEmpty()) {
                     executor.execute(() -> {
                         Bitmap bmp = null;
@@ -594,6 +759,10 @@ public class MainActivity extends BridgeActivity {
                         pauseReleaseRunnable = null;
                     }
                     acquireWakeLock();
+                    requestAudioFocus();
+                    resumeOnFocusGain = false;
+                    startKeepAlive();
+                    if (!isActivityStopped) maybeRequestBatteryOptimizationExemption();
                     if (getBridge() != null && getBridge().getWebView() != null) {
                         getBridge().getWebView().onResume();
                         getBridge().getWebView().resumeTimers();
@@ -604,7 +773,7 @@ public class MainActivity extends BridgeActivity {
                     }
                     updateNotificationAndSession();
                 } else {
-                    // Grace period of 15 seconds to allow track transitions and lockscreen buffering without OS freezing
+                    stopKeepAlive();
                     if (pauseReleaseRunnable != null) {
                         pauseHandler.removeCallbacks(pauseReleaseRunnable);
                     }
@@ -631,6 +800,10 @@ public class MainActivity extends BridgeActivity {
                 }
                 hasActiveTrack = false;
                 isCurrentlyPlaying = false;
+                resumeOnFocusGain = false;
+                isDucked = false;
+                stopKeepAlive();
+                abandonAudioFocus();
                 releaseWakeLock();
                 hideNotification();
             });

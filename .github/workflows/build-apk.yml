@@ -19,6 +19,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # нужны теги, чтобы взять версию из последнего тега
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -60,17 +62,38 @@ jobs:
             keytool -genkeypair -v -keystore android/app/release-key.jks -alias material-ereader -keyalg RSA -keysize 2048 -validity 10000 -storepass material123 -keypass material123 -dname "CN=Material EReader, OU=Mobile, O=OpenSource, L=Global, ST=Global, C=RU"
           fi
 
+      - name: Resolve App Version from Git Tag
+        run: |
+          # Сборка по тегу — версия из этого тега.
+          # Любая другая сборка (push в main, ручной запуск) — из последнего тега v*.
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            RAW="${GITHUB_REF_NAME}"
+          else
+            RAW="$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)"
+          fi
+          if [ -z "$RAW" ]; then
+            RAW="$(node -p "require('./package.json').version")"
+          fi
+          # v1.1.0, V1.1.0 и v.1.1.0 -> 1.1.0
+          VERSION="$(echo "$RAW" | sed -E 's/^[vV]\.?//')"
+          if ! [[ "$VERSION" =~ ^[0-9]+(\.[0-9]+){1,3}$ ]]; then
+            echo "::error::Не удалось получить версию из '$RAW'. Используйте теги вида v1.1.0"
+            exit 1
+          fi
+          echo "App version: $VERSION (from '$RAW')"
+          echo "APP_VERSION_NAME=$VERSION" >> "$GITHUB_ENV"
+
       - name: Build Signed Debug APK
         run: |
           cd android
           VERSION_CODE=$((10000 + ${{ github.run_number }}))
-          ./gradlew assembleDebug -PversionCode=$VERSION_CODE --stacktrace --no-daemon
+          ./gradlew assembleDebug -PversionCode=$VERSION_CODE -PversionName=$APP_VERSION_NAME --stacktrace --no-daemon
 
       - name: Build Signed Release APK
         run: |
           cd android
           VERSION_CODE=$((10000 + ${{ github.run_number }}))
-          ./gradlew assembleRelease -PversionCode=$VERSION_CODE --stacktrace --no-daemon || true
+          ./gradlew assembleRelease -PversionCode=$VERSION_CODE -PversionName=$APP_VERSION_NAME --stacktrace --no-daemon || true
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4

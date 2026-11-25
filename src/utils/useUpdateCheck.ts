@@ -141,7 +141,7 @@ export function useUpdateCheck(): UpdateCheck {
       const data = await res.json();
       const tag: string = String(data.tag_name || '');
       const release: ReleaseInfo = {
-        version: tag.replace(/^v/i, ''),
+        version: tag.replace(/^v\.?/i, ''),
         tag,
         name: String(data.name || tag),
         url: String(data.html_url || `${SOURCE_CODE_REPO_URL}/releases/latest`),

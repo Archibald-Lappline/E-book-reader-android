@@ -266,6 +266,38 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, []);
 
+  // Плавное изменение громкости (приглушение при уведомлениях, пауза при звонке).
+  // setInterval, а не requestAnimationFrame: rAF не работает при выключенном экране.
+  const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const fadeVolume = useCallback((target: number, durationMs: number, onDone?: () => void) => {
+    const audio = audioRef.current;
+    if (fadeTimerRef.current) {
+      clearInterval(fadeTimerRef.current);
+      fadeTimerRef.current = null;
+    }
+    if (!audio) {
+      onDone?.();
+      return;
+    }
+    const from = audio.volume;
+    const steps = Math.max(1, Math.round(durationMs / 25));
+    let step = 0;
+    fadeTimerRef.current = setInterval(() => {
+      step++;
+      const k = step / steps;
+      // ease-in-out, чтобы начало и конец изменения были незаметны
+      const eased = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+      try {
+        audio.volume = Math.min(1, Math.max(0, from + (target - from) * eased));
+      } catch {}
+      if (step >= steps) {
+        if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
+        fadeTimerRef.current = null;
+        onDone?.();
+      }
+    }, 25);
+  }, []);
+
   // Setup MediaSession and Android Media Bridge for Android notification shade, lockscreen, and Bluetooth controls
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -319,13 +351,46 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         case 'stop':
           closePlayerRef.current?.();
           break;
+        // ---- Аудиофокус (MainActivity.java) ----
+        case 'duck':
+          // Уведомление: плавно приглушить до 20%
+          fadeVolume(0.2, 450);
+          break;
+        case 'unduck':
+          fadeVolume(1, 900);
+          break;
+        case 'focusPause':
+          // Звонок или другое приложение: плавно затихнуть и поставить на паузу
+          if (Date.now() - lastPlayRequestTimeRef.current < 2500) break;
+          fadeVolume(0, 350, () => {
+            audioRef.current?.pause();
+            setIsPlaying(false);
+            if (audioRef.current) audioRef.current.volume = 1;
+          });
+          break;
+        case 'focusResume':
+          if (audioRef.current) {
+            lastPlayRequestTimeRef.current = Date.now();
+            audioRef.current.volume = 0;
+            audioRef.current
+              .play()
+              .then(() => {
+                setIsPlaying(true);
+                fadeVolume(1, 900);
+              })
+              .catch(() => {
+                if (audioRef.current) audioRef.current.volume = 1;
+              });
+          }
+          break;
       }
     };
 
     return () => {
       delete (window as any).audioBridgeAction;
+      if (fadeTimerRef.current) clearInterval(fadeTimerRef.current);
     };
-  }, [seekDelta, seekTo]);
+  }, [seekDelta, seekTo, fadeVolume]);
 
   // Synchronize track metadata with MediaSession & Android Native Bridge
   useEffect(() => {
@@ -353,7 +418,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         navigator.mediaSession.metadata = new MediaMetadata({
           title: currentTrack.title,
           artist: currentTrack.author || currentCollection?.author || tr("Аудиокнига"),
-          album: currentCollection?.title || 'BookSlut',
+          album: currentCollection?.title || 'Читалка Книг',
           artwork: cover
             ? [
                 { src: cover, sizes: '96x96', type: 'image/png' },
@@ -403,7 +468,7 @@ export const AudioPlayerProvider: React.FC<{ children: React.ReactNode }> = ({ c
         (window as any).AndroidMediaBridge.updateMediaMetadata(
           currentTrack.title,
           currentTrack.author || currentCollection?.author || tr("Аудиокнига"),
-          currentCollection?.title || 'BookSlut',
+          currentCollection?.title || 'Читалка Книг',
           cover
         );
       } catch (e) {
